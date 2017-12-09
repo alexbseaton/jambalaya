@@ -19,7 +19,9 @@ def parse(source, destination, date, test=False):
                 total_prices[leg] = flight_data['legs'][leg]['price']['totalPriceAsDecimal']
             total_prices['timestamp'] = timestamp
 
-            with open(os.path.join(os.pardir, 'data', 'scraped_data', 'scraped_data.pkl'), 'wb') as f:
+            filename = 'price_scrape_' + str(timestamp)
+            filepath = os.path.join(os.pardir, 'data', 'scraped_data', filename)
+            with open(filepath, 'wb') as f:
                 pkl.dump(total_prices, f)
 
             print(flight_data['legs']['130e4a71ac38db2b22c866088d5fe135'])
@@ -28,7 +30,6 @@ def parse(source, destination, date, test=False):
 
             print(total_prices['130e4a71ac38db2b22c866088d5fe135'])
             print(total_prices['timestamp'])
-
             return
 
         except ValueError:
