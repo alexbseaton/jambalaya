@@ -1,1 +1,4 @@
 # files to be ignored by git
+
+# IDE files
+.idea/
