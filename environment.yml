@@ -3,5 +3,6 @@ dependencies:
   - python=3.6.3
   - requests
   - pip
+  - lxml
   - pip:
       - bs4
