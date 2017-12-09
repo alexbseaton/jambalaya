@@ -1,0 +1,7 @@
+name: jambalaya-env
+dependencies:
+  - python=3.6.3
+  - requests
+  - pip
+  - pip:
+      - bs4
