@@ -13,20 +13,13 @@ def parse(source, destination, date, test=False):
             raw_json = get_raw_json(source, destination, date, test)
             timestamp = dt.datetime(2017, 12, 19, 17) if test else dt.datetime.now()
             timestamp = timestamp.strftime("%d-%m-%y_%H_%M")
-            flight_data = json.loads(raw_json["content"])
-
-            total_prices = {}
-            for key, leg in flight_data['legs'].items():
-                total_prices[key] = leg['price']['totalPriceAsDecimal']
-            total_prices['timestamp'] = timestamp
-
-            filename = 'price_scrape_' + str(timestamp)
+            flight_data = (timestamp, json.loads(raw_json["content"])['legs'])
+            filename = 'scrape_' + str(timestamp)
             filepath = os.path.join(os.pardir, 'data', 'scraped_data', filename)
             with open(filepath, 'wb') as f:
-                pkl.dump(total_prices, f)
+                pkl.dump(flight_data, f)
 
-            print(flight_data['legs'])
-            print(total_prices['timestamp'])
+            print(flight_data)
             return
 
         except ValueError:
