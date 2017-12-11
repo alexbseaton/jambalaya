@@ -5,3 +5,7 @@
 
 # AWS
 aws-jambalaya-credentials.csv
+.vscode/.ropeproject/config.py
+.gitignore
+
+data/
