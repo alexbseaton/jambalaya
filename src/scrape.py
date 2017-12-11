@@ -11,7 +11,8 @@ def parse(source, destination, date, test=False):
     for i in range(n_tries):
         try:
             raw_json = get_raw_json(source, destination, date, test)
-            timestamp = dt.datetime(2017, 12, 19, 17) if test else dt.datetime.now()  # TODO: get this from JSON?
+            timestamp = dt.datetime(2017, 12, 19, 17) if test else dt.datetime.now()
+            timestamp = timestamp.strftime("%d-%m-%y--%H--%M")
             flight_data = json.loads(raw_json["content"])
 
             total_prices = dict()
