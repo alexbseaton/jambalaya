@@ -25,16 +25,12 @@ def parse(source, destination, date, test=False):
             with open(filepath, 'wb') as f:
                 pkl.dump(total_prices, f)
 
-            print(flight_data['legs']['130e4a71ac38db2b22c866088d5fe135'])
-
-            assert flight_data['legs']['130e4a71ac38db2b22c866088d5fe135']['carrierSummary']['airlineName'] == 'Air Europa'
-
-            print(total_prices['130e4a71ac38db2b22c866088d5fe135'])
+            print(flight_data['legs'])
             print(total_prices['timestamp'])
             return
 
         except ValueError:
-            print('Retrying')
+            print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
 
 
 def get_raw_json(source, destination, date, test):
