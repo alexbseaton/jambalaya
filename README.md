@@ -8,3 +8,4 @@
 # Steps to improve repo
 1. Write PEP8 test (PEP8 failures, minimal print statements)
 2. Create logger
+3. Decouple test and source code....
