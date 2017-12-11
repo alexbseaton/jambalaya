@@ -12,12 +12,12 @@ def parse(source, destination, date, test=False):
         try:
             raw_json = get_raw_json(source, destination, date, test)
             timestamp = dt.datetime(2017, 12, 19, 17) if test else dt.datetime.now()
-            timestamp = timestamp.strftime("%d-%m-%y--%H--%M")
+            timestamp = timestamp.strftime("%d-%m-%y_%H_%M")
             flight_data = json.loads(raw_json["content"])
 
-            total_prices = dict()
-            for leg in flight_data['legs'].keys():
-                total_prices[leg] = flight_data['legs'][leg]['price']['totalPriceAsDecimal']
+            total_prices = {}
+            for key, leg in flight_data['legs'].items():
+                total_prices[key] = leg['price']['totalPriceAsDecimal']
             total_prices['timestamp'] = timestamp
 
             filename = 'price_scrape_' + str(timestamp)
@@ -60,4 +60,3 @@ def save_json(raw_json):
 
 if __name__ == '__main__':
     parse('LGW', 'MAD', '12/19/2017', test=True)
-    # parse('LGW', 'MAD', '12/19/2017', test=False)
