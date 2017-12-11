@@ -1,7 +1,0 @@
-# files to be ignored by git
-
-# IDE files
-.idea/
-
-# AWS
-aws-jambalaya-credentials.csv
