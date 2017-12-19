@@ -48,4 +48,4 @@ def save_json(raw_json):
 
 
 if __name__ == '__main__':
-    parse('LGW', 'MAD', '12/19/2017', test=True)
+    parse('LGW', 'MAD', '2/19/2018')
