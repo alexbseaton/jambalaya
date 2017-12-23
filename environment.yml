@@ -1,8 +1,0 @@
-name: jambalaya-env
-dependencies:
-  - python=3.6
-  - requests
-  - pip
-  - lxml
-  - pip:
-      - bs4

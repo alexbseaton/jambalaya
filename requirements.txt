@@ -1,4 +1,2 @@
-requests
-pip
-lxml
 bs4
+requests

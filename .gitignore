@@ -2,9 +2,10 @@
 
 # IDE files
 .idea/
+.vscode/.ropeproject/config.py
+
 
 # AWS
 aws-jambalaya-credentials.csv
-.vscode/.ropeproject/config.py
-
-data/
+scraped_data/
+deployment/
