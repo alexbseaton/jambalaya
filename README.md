@@ -43,3 +43,6 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
 1. Activate your jambalaya environment
 2. Run *pip-compile --output-file dev_requirements.txt dev_requirements.in*
 3. Run *pip-sync dev_requirements.txt*
+
+https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
+https://s3.amazonaws.com/owen-jambalaya-lambda-scraper/deployment-zip.zip
