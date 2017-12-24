@@ -1,5 +1,7 @@
 # files to be ignored by git
 
+*.DS_Store
+
 # IDE files
 .idea/
 .vscode/.ropeproject/config.py
