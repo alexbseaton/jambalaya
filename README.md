@@ -10,26 +10,28 @@
 2. Create logger
 3. Decouple test and source code....
 
+## Installation
+For pinning dependencies, we use pip-tools:
+
+pip install pip-tools
+
+Pip-tools allows you to ensure that your local environment contains *exactly* packages specified in the requirements file. In general, the usage of pip-tools is:
+
+1. Update the requirements.in file. It should contain a list of all packages imported in the code.
+2. Run *pip-compile --output-file requirements.txt requirements.in* to compile a requirements file
+   that lists all the packages in requirements.in **and their dependencies**.
+3. Run *pip-sync requirements.txt* to update your local environment.
 
 # Deployment Installation
-To create a deployment package, install the requirements by running,
+1. Run *pip-compile --output-file deployment_requirements.txt deployment_requirements.in*
+2. Run *pip install -r deployment_requirements.txt -t deployment*
 
-pip install -r deployment_requirements.txt -t deployment_directory
+  - Note: you cannot use pip-sync here, so surplus packages will not be uninstalled.
 
-then add handler.py to that folder, then zip the *contents* of the deployment folder and put that ZIP on AWS.
+3. Add handler.py to the deployment folder, then zip the *contents* of the deployment folder and
+   put that ZIP on AWS.
 
-NOTE: this process may result in surplus requirements. Any requirements that are installed to the
-deployment directory but later removed from requirements.txt will remain installed.
-
-# Developer Installation/Maintenance
-To maintain the environment, you can skip step 1
-1. Install pip tools
-   pip install pip-tools
-2. List all and only the required packages in requirements.in
-3. Compile a list of packages in requirements.in along and their dependencies
-   pip-compile --output-file dev_requirements.txt dev_requirements.in
-4. Update your environment:
-   pip-sync requirements.txt
-
-Note: this process will ensure that any packages already installed in your environment that are not
-listed in requirements.in are uninstalled.
+# Developer Installation
+1. Activate your jambalaya environment
+2. Run *pip-compile --output-file dev_requirements.txt dev_requirements.in*
+3. Run *pip-sync dev_requirements.txt*
