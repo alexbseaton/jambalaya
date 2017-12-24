@@ -20,9 +20,9 @@ def my_handler(event, context):
         pkl.dump(flight_data, f)
     s3_client.upload_file(filepath, 'alex-jambalaya-json-dumps', "scrape_{}.pkl".format(timestamp))
     print(flight_data)
-    return { 
+    return {
         'message' : "ran OK"
-    } 
+    }
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@
 # Deployment Installation
 To create a deployment package, install the requirements by running,
 
-pip-install -r requirements.txt -t deployment_directory
+pip install -r deployment_requirements.txt -t deployment_directory
 
 then add handler.py to that folder, then zip the *contents* of the deployment folder and put that ZIP on AWS.
 
@@ -27,7 +27,7 @@ To maintain the environment, you can skip step 1
    pip install pip-tools
 2. List all and only the required packages in requirements.in
 3. Compile a list of packages in requirements.in along and their dependencies
-   pip-compile --output-file requirements.txt requirements.in
+   pip-compile --output-file dev_requirements.txt dev_requirements.in
 4. Update your environment:
    pip-sync requirements.txt
 
