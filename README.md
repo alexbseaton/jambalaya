@@ -22,14 +22,20 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
    that lists all the packages in requirements.in **and their dependencies**.
 3. Run *pip-sync requirements.txt* to update your local environment.
 
-# Deployment Installation
+# Deployment Installation - Manual
 1. Run *pip-compile --output-file deployment_requirements.txt deployment_requirements.in*
 2. Run *pip install -r deployment_requirements.txt -t deployment*
 
   - Note: you cannot use pip-sync here, so surplus packages will not be uninstalled.
 
-3. Add handler.py to the deployment folder, then zip the *contents* of the deployment folder and
-   put that ZIP on AWS.
+3. Add handler.py to the deployment folder
+4. Zip the *contents* of the deployment folder and put that ZIP on AWS.
+
+# Deployment Installation - Automated
+- Run *make_deployment.cmd* to automate steps 1-4 of the manual deployment installation
+- Note: the paths to the program 7z.exe is currently hardcoded, so it may not work
+- Note: the script currently deletes the deployment folder and starts fresh by redownloading all
+  packages. This could probably be avoided. (The hardcoded location is C:\Program Files\7-Zip\7z.exe)
 
 # Developer Installation
 1. Activate your jambalaya environment
