@@ -18,12 +18,12 @@ For pinning dependencies, we use pip-tools:
 Pip-tools allows you to ensure that your local environment contains *exactly* packages specified in the requirements file. In general, the usage of pip-tools is:
 
 1. Update the requirements.in file. It should contain a list of all packages imported in the code.
-2. Run *pip-compile --output-file requirements.txt requirements.in* to compile a requirements file
+2. Run *pip-compile requirements.in* to compile a requirements.txt file
    that lists all the packages in requirements.in **and their dependencies**.
 3. Run *pip-sync requirements.txt* to update your local environment.
 
 # Deployment Installation - Manual
-1. Run *pip-compile --output-file deployment_requirements.txt deployment_requirements.in*
+1. Run *pip-compile deployment_requirements.in*
 2. Run *pip install -r deployment_requirements.txt -t deployment*
 
     - Note: you cannot use pip-sync here, so surplus packages will not be uninstalled.
@@ -35,14 +35,13 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
 # Deployment Installation - Automated
 - Run *make_deployment.cmd* to automate steps 1-4 of the manual deployment installation
 - Note: you must have pip-tools installed in your environment (see above)
-- Note: the paths to the program 7z.exe is currently hardcoded, so it may not work
+- Note: you must have the programme 7zip installed at C:\Program Files\7-Zip\7z.exe
 - Note: the script currently deletes the deployment folder and starts fresh by re-downloading all
-  packages. This could probably be avoided. (The hardcoded location is C:\Program Files\7-Zip\7z.exe)
+  packages. This could probably be avoided.
 
 # Developer Installation
 1. Activate your jambalaya environment
-2. Run *pip-compile --output-file dev_requirements.txt dev_requirements.in*
+2. Run *pip-compile dev_requirements.in*
 3. Run *pip-sync dev_requirements.txt*
 
 https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
-https://s3.amazonaws.com/owen-jambalaya-lambda-scraper/deployment-zip.zip
