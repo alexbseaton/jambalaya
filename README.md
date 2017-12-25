@@ -44,4 +44,7 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
 2. Run *pip-compile dev_requirements.in*
 3. Run *pip-sync dev_requirements.txt*
 
-https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
+# Running the function on aws
+1. Upload from s3 bucket: https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
+2. Check that the region is London (eu-west-2). The region is displayed in top right of the screen,
+   in the menu bar, next to the account name.
