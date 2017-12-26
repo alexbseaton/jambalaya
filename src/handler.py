@@ -12,7 +12,12 @@ S3BUCKET = os.environ['s3_bucket']
 
 def my_handler(event, context):
     n_tries = event['n_tries']
-    scrape(n_tries)
+    try:
+        scrape(n_tries)
+        return {'message': 'Ran ok'}
+    except Exception as e:
+        return {'message': 'Error running scrape function: {}.'.format(e)}
+
 
 def scrape(n_tries):
     for i in range(n_tries):
@@ -20,9 +25,7 @@ def scrape(n_tries):
             raw_json = get_raw_json()
             flight_data = (dt.datetime.now().strftime("%d-%m-%y_%H_%M"), json.loads(raw_json["content"])['legs'])
             save_flight_data(flight_data, S3BUCKET)
-            print(flight_data)
-
-            return {'message' : "ran OK"}
+            return flight_data
         except ValueError:
             print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
 
