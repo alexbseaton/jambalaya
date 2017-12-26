@@ -14,6 +14,9 @@ DEL deployment_requirements.txt
 xcopy ..\src\handler.py ..\deployment
 "C:\Program Files\7-Zip\7z.exe" a ../deployment/deployment-zip.zip ../deployment/*
 
-aws s3 rm s3://alex-jambalaya-json-dumps/deployment-zip.zip
-aws s3 cp ../deployment/deployment-zip.zip s3://alex-jambalaya-json-dumps/deployment-zip.zip
-aws lambda update-function-code --function-name my_function --s3-bucket alex-jambalaya-json-dumps --s3-key deployment-zip.zip
+
+REM aws s3 rm s3://alex-jambalaya-json-dumps/deployment-zip.zip
+ECHO Upload to S3
+REM aws s3 cp ..\deployment\deployment-zip.zip s3://alex-jambalaya-json-dump
+
+aws lambda update-function-code --function-name my_function --zip-file fileb://../deployment/deployment-zip.zip

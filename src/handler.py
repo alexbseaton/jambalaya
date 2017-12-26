@@ -7,7 +7,7 @@ import pickle as pkl
 
 s3_client = boto3.client('s3')
 
-def handler(event, context):
+def my_handler(event, context):
     url = "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3Aeconomy&mode=search&origref=www.expedia.com".format(
         'LGW', 'MAD', '2/17/2018')
     page = requests.get(url).text
