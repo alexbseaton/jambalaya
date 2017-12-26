@@ -1,12 +1,14 @@
 import downloader
 import pprint
+import pickle as pkl
 
 def create_dev_aids():
     '''
     Writes the key/value structure of a 'leg' to some text files in the ../data folder to make it a bit clearer
     what's going on.
     '''
-    json = downloader.download()[1]
+    with open('../data/26-12-17_12_16.pkl', 'rb') as f:
+        json = pkl.load(f)[1]
     first_leg = next(iter(json.values()))
     with open('../data/key_structure.txt', 'w') as f:
         f.write(visualise(first_leg, 1))
