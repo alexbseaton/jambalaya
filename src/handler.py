@@ -12,12 +12,19 @@ S3BUCKET = os.environ['s3_bucket']
 
 def my_handler(event, context):
     n_tries = event['n_tries']
-    for i in range(n_tries):
-        raw_json = get_raw_json()
-        flight_data = (dt.datetime.now().strftime("%d-%m-%y_%H_%M"), json.loads(raw_json["content"])['legs'])
-        save_flight_data(flight_data, '/tmp/' + flight_data[0], S3BUCKET)
+    scrape(n_tries)
 
-        return {'message' : "ran OK"}
+
+def scrape(n_tries):
+    for i in range(n_tries):
+        try:
+            raw_json = get_raw_json()
+            flight_data = (dt.datetime.now().strftime("%d-%m-%y_%H_%M"), json.loads(raw_json["content"])['legs'])
+            save_flight_data(flight_data, S3BUCKET)
+
+            print(flight_data)
+
+            return {'message' : "ran OK"}
 
 def get_raw_json():
         url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
@@ -28,11 +35,12 @@ def get_raw_json():
 
         return json.loads(soup.find(id="cachedResultsJson").string)
 
-def save_flight_data(flight_data, filepath, s3_bucket):
-    with open(filepath, 'wb') as f:
+def save_flight_data(flight_data, s3_bucket):
+    filename = "scrape_{}.pkl".format(flight_data[0])
+    local_filepath = os.path.join('/tmp/', filename)
+    with open(local_filepath, 'wb') as f:
         pkl.dump(flight_data, f)
-    s3_client.upload_file(filepath, s3_bucket, "scrape_{}.pkl".format(flight_data[0]))
-    print(flight_data)
+    s3_client.upload_file(local_filepath, s3_bucket, filename)
 
 
 if __name__ == '__main__':
