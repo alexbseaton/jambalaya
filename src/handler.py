@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import boto3
 import pickle as pkl
+import io
 
 s3_client = boto3.client('s3')
 
@@ -17,6 +18,7 @@ def my_handler(event, context):
     except Exception as e:
         return {'message': 'Error running scrape function: {}.'.format(e)}
 
+
 def scrape(n_tries, s3_bucket):
     for i in range(n_tries):
         try:
@@ -27,6 +29,7 @@ def scrape(n_tries, s3_bucket):
         except ValueError:
             print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
 
+
 def get_raw_json():
     url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
             "{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3A"\
@@ -36,12 +39,12 @@ def get_raw_json():
 
     return json.loads(soup.find(id="cachedResultsJson").string)
 
+
 def save_flight_data(flight_data, s3_bucket):
     filename = "scrape_{}.pkl".format(flight_data[0])
-    local_filepath = os.path.join('/tmp/', filename)
-    with open(local_filepath, 'wb') as f:
-        pkl.dump(flight_data, f)
-    s3_client.upload_file(local_filepath, s3_bucket, filename)
+    dump_to = io.BytesIO()
+    pkl.dump(flight_data, dump_to)
+    s3_client.upload_fileobj(dump_to, s3_bucket, filename)
 
 
 if __name__ == '__main__':
