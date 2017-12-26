@@ -27,13 +27,13 @@ def scrape(n_tries):
             print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
 
 def get_raw_json():
-        url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
-                "{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3A"\
-                "economy&mode=search&origref=www.expedia.com".format('LGW', 'MAD', '2/17/2018')
-        page = requests.get(url).text
-        soup = BeautifulSoup(page, 'html.parser')
+    url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
+            "{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3A"\
+            "economy&mode=search&origref=www.expedia.com".format('LGW', 'MAD', '2/17/2018')
+    page = requests.get(url).text
+    soup = BeautifulSoup(page, 'html.parser')
 
-        return json.loads(soup.find(id="cachedResultsJson").string)
+    return json.loads(soup.find(id="cachedResultsJson").string)
 
 def save_flight_data(flight_data, s3_bucket):
     filename = "scrape_{}.pkl".format(flight_data[0])
