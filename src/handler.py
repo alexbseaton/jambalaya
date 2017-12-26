@@ -7,9 +7,9 @@ import boto3
 import pickle as pkl
 
 s3_client = boto3.client('s3')
-S3BUCKET = os.environ['s3_bucket']
 
 def my_handler(event, context):
+    S3BUCKET = os.environ['s3_bucket']
     n_tries = event['n_tries']
     try:
         scrape(n_tries, S3BUCKET)
