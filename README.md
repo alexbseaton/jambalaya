@@ -8,14 +8,13 @@
 # Steps to improve repo
 1. Write PEP8 test (PEP8 failures, minimal print statements)
 2. Create logger
-3. Decouple test and source code....
 
 ## Installation
-For pinning dependencies, we use pip-tools:
+For pinning dependencies, use pip-tools:
 
 *pip install pip-tools*
 
-Pip-tools allows you to ensure that your local environment contains *exactly* packages specified in the requirements file. In general, the usage of pip-tools is:
+Pip-tools updates your local environment with *exactly* packages specified in the requirements file. To use it:
 
 1. Update the requirements.in file. It should contain a list of all packages imported in the code.
 2. Run *pip-compile requirements.in* to compile a requirements.txt file
@@ -49,3 +48,6 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
 1. Upload from s3 bucket: https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
 2. Check that the region is London (eu-west-2). The region is displayed in top right of the screen,
    in the menu bar, next to the account name.
+
+# Notes to self
+Use the named accounts (not the root) and make sure the location is London (eu-west-2) or the Lambda might go missing, which would be sad.
