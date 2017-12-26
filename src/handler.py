@@ -17,7 +17,6 @@ def my_handler(event, context):
     except Exception as e:
         return {'message': 'Error running scrape function: {}.'.format(e)}
 
-
 def scrape(n_tries, s3_bucket):
     for i in range(n_tries):
         try:
