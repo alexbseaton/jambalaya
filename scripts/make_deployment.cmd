@@ -16,7 +16,6 @@ xcopy ..\src\handler.py ..\deployment
 
 
 REM aws s3 rm s3://alex-jambalaya-json-dumps/deployment-zip.zip
-ECHO Upload to S3
 REM aws s3 cp ..\deployment\deployment-zip.zip s3://alex-jambalaya-json-dump
 
 aws lambda update-function-code --function-name my_function --zip-file fileb://../deployment/deployment-zip.zip
