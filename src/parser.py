@@ -25,4 +25,4 @@ def visualise(dict_of_dicts: dict, n_nestings: int) -> str:
 
 
 if __name__ == '__main__':
-    parse()
+    create_dev_aids()
