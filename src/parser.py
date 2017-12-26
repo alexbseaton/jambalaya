@@ -1,10 +1,17 @@
 import downloader
+import pprint
 
-def parse():
+def create_dev_aids():
+    '''
+    Writes the key/value structure of a 'leg' to some text files in the ../data folder to make it a bit clearer
+    what's going on.
+    '''
     json = downloader.download()[1]
     first_leg = next(iter(json.values()))
-    with open('../data/json_structure.txt', 'w') as f:
+    with open('../data/key_structure.txt', 'w') as f:
         f.write(visualise(first_leg, 1))
+    with open('../data/value_structure.txt', 'w') as f:
+        pprint.pprint(first_leg, stream=f)
 
 def visualise(dict_of_dicts: dict, n_nestings: int) -> str:
     result = ''
