@@ -45,6 +45,7 @@ def save_flight_data(flight_data, s3_bucket):
     filename = "scrape_{}.pkl".format(flight_data[0])
     dump_to = io.BytesIO()
     pkl.dump(flight_data, dump_to)
+    dump_to.seek(0) # got to drag the stream back to the beginning
     s3_client.upload_fileobj(dump_to, s3_bucket, filename)
 
 
