@@ -32,7 +32,7 @@ Pip-tools updates your local environment with *exactly* packages specified in th
 5. Configure the aws command line interface
 
 # Deployment Installation - Automated
-- Run *make_deployment.cmd* to automate steps 1-4 of the manual deployment installation
+- Run *make_deployment.cmd*
 - Note: you must have pip installed in your environment
 - Note: you must have the programme 7zip installed at C:\Program Files\7-Zip\7z.exe
 - Note: your AWS account details must be saved as the default profile in the AWS CLI
