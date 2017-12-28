@@ -12,14 +12,17 @@ s3_client = boto3.client('s3')
 def my_handler(event, context):
     S3BUCKET = os.environ['s3_bucket']
     n_tries = int(os.environ['n_tries'])
-    scrape(n_tries, S3BUCKET)
+    departure_airport = os.environ['departure_airport']
+    arrival_airport = os.environ['arrival_airport']
+    departure_date = os.environ['mmddyyyy_date']
+    scrape(n_tries, S3BUCKET, departure_airport, arrival_airport, departure_date)
     return {'message': 'Ran ok'}
 
 
-def scrape(n_tries, s3_bucket):
+def scrape(n_tries, s3_bucket, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
-            raw_json = get_raw_json()
+            raw_json = get_raw_json(departure_airport, arrival_airport, departure_date)
             legs = json.loads(raw_json["content"])['legs']
             if legs == {}:
                 raise ValueError("No data in script- maybe it sent us to a reCaptcha?")
@@ -31,10 +34,10 @@ def scrape(n_tries, s3_bucket):
             print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
 
 
-def get_raw_json():
+def get_raw_json(departure_airport, arrival_airport, departure_date):
     url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
             "{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3A"\
-            "economy&mode=search&origref=www.expedia.com".format('LGW', 'MAD', '2/17/2018')
+            "economy&mode=search&origref=www.expedia.com".format(departure_airport, arrival_airport, departure_date)
     page = requests.get(url).text
     soup = BeautifulSoup(page, 'html.parser')
 

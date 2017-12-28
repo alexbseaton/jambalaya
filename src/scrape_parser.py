@@ -7,6 +7,7 @@ import dateutil.parser
 from enum import Enum, unique
 from typing import List
 
+
 @unique
 class TimeOfDay(Enum):
     morning = 'MORNING'
@@ -33,6 +34,7 @@ class Leg(object):
         self.departure_time_of_day = departure_time_of_day #: When the flight leaves
         self.arrival_time_of_day = arrival_time_of_day #: When the flights arrives
 
+
     def represents_same_leg(self, other):
         '''
         Returns true if this object represents the same flight as other
@@ -41,6 +43,7 @@ class Leg(object):
         self.departure_location == other.departure_location and\
         self.arrival_location == other.arrival_location and\
         self.departure_date == other.departure_date
+
 
     def __repr__(self):
         return str(self.__dict__)
