@@ -1,20 +1,57 @@
 import boto3
 import io
 import pickle as pkl
+import datetime as dt
+from functools import partial
+from typing import List, Tuple
 
-def download():
+Scrape = List[Tuple[str, dict]]
+
+def download_item(key: str) -> Scrape:
     ''' 
-    Probably want the API to be something like given this date, return me a list of all the
-    things we saved that day, seeing as we won't know the exact time.
+    Loads the item in the bucket with the given key.
+
+    The key must refer to a .pkl file.
+
+    Args:
+        key (str) The name of the item you wish to download
+    Returns:
+        The in-memory representation of the pickled item you downloaded 
     '''
+    assert key.endswith('.pkl')
     s3 = boto3.resource('s3')
     bucket = s3.Bucket('alex-jambalaya-json-dumps')
-    key = 'scrape_26-12-17_12_38.pkl'
     write_to = io.BytesIO()
     bucket.download_fileobj(key, write_to)
     write_to.seek(0) # got to drag the stream back to the beginning
     return pkl.load(write_to)
 
 
-if __name__ == '__main__':
-    print(download())
+def download_all_on_day(date: dt.date) -> List[Scrape]:
+    '''
+    Downloads all the scrapes that were made on date.
+
+    Args:
+        date: This method will download all the scrapes made on the supplied date
+
+    Returns:
+        A list of the scrapes made on date, which are tuples of the date the
+        request was made in "%d-%m-%y_%H_%M" format and the actual payload of 
+        the request as a dict.
+    '''
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket('alex-jambalaya-json-dumps')
+
+    result = []
+    for obj in filter(partial(_is_saved_on_date, date), bucket.objects.all()):
+        result.append(download_item(obj.key))
+    
+    return result
+
+
+def _is_saved_on_date(date, object_summary):
+    try:
+        request_time = dt.datetime.strptime(object_summary.key, "scrape_%d-%m-%y_%H_%M.pkl")
+        return request_time.date() == date
+    except ValueError: # Might not be a scrape
+        return False
