@@ -11,20 +11,21 @@ s3_client = boto3.client('s3')
 
 def my_handler(event, context):
     S3BUCKET = os.environ['s3_bucket']
-    n_tries = event['n_tries']
-    try:
-        scrape(n_tries, S3BUCKET)
-        return {'message': 'Ran ok'}
-    except Exception as e:
-        return {'message': 'Error running scrape function: {}.'.format(e)}
+    n_tries = int(os.environ['n_tries'])
+    scrape(n_tries, S3BUCKET)
+    return {'message': 'Ran ok'}
 
 
 def scrape(n_tries, s3_bucket):
     for i in range(n_tries):
         try:
             raw_json = get_raw_json()
-            flight_data = (dt.datetime.now().strftime("%d-%m-%y_%H_%M"), json.loads(raw_json["content"])['legs'])
+            legs = json.loads(raw_json["content"])['legs']
+            if legs == {}:
+                raise ValueError("No data in script- maybe it sent us to a reCaptcha?")
+            flight_data = (dt.datetime.now().strftime("%d-%m-%y_%H_%M"), legs)
             save_flight_data(flight_data, s3_bucket)
+            print(flight_data)
             return flight_data
         except ValueError:
             print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
