@@ -68,8 +68,5 @@ class TestDownloadAndParse(unittest.TestCase):
         matplotlib.pyplot.plot_date(dates, prices)
         #matplotlib.pyplot.show()
 
-
-
-
 if __name__ == '__main__':
     unittest.main()
