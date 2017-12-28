@@ -5,3 +5,4 @@ datetime
 awscli
 dateutil
 typing
+matplotlib

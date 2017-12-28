@@ -27,12 +27,13 @@ def download_item(key: str) -> Scrape:
     return pkl.load(write_to)
 
 
-def download_all_on_day(date: dt.date) -> List[Scrape]:
+def download_all_on_day(date: dt.date, file: str = None) -> List[Scrape]:
     '''
     Downloads all the scrapes that were made on date.
 
     Args:
         date: This method will download all the scrapes made on the supplied date
+        write_to_file: The file to write the pickled result of this function to
 
     Returns:
         A list of the scrapes made on date, which are tuples of the date the
@@ -45,11 +46,15 @@ def download_all_on_day(date: dt.date) -> List[Scrape]:
     result = []
     for obj in filter(partial(_is_saved_on_date, date), bucket.objects.all()):
         result.append(download_item(obj.key))
+
+    if file:
+        with open(file, 'wb') as f:
+            pkl.dump(result, f)
     
     return result
 
 
-def _is_saved_on_date(date, object_summary):
+def _is_saved_on_date(date, object_summary): 
     try:
         request_time = dt.datetime.strptime(object_summary.key, "scrape_%d-%m-%y_%H_%M.pkl")
         return request_time.date() == date
