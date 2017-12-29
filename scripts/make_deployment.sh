@@ -1,15 +1,23 @@
-rm -r deployment
-rm deployment-zip.zip
+# Run from the scripts directory with:
+# chmod u+x make_deployment.sh
+# ./make_deployment.sh
+set -e # fail on first error
 
-echo
+echo Creating deployment directory
+mkdir deployment
 
-echo Create deployment directory
-
+echo Installing dependencies
+touch deployment_requirements.txt
 pip-compile --output-file deployment_requirements.txt ../deployment_requirements.in
 pip install -r deployment_requirements.txt -t ../deployment
 rm deployment_requirements.txt
-cp ../src/handler.py ../deployment
-zip deployment/deployment-zip.zip deployment/*
 
-aws s3 cp deployment/deployment-zip.zip s3://alex-jambalaya-json-dumps
-aws lambda update-function-code --function-name my_function --s3-bucket alex-jambalaya-json-dumps --s3-key deployment-zip.zip
+echo Adding handler to deployment
+cp ../src/handler.py deployment
+
+echo Zipping deployment
+7z a deployment/deployment-zip.zip deployment/*
+
+echo Pushing to AWS
+aws lambda update-function-code --function-name my_function --zip-file fileb://./deployment/deployment-zip.zip
+rm -r deployment
