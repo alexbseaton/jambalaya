@@ -23,20 +23,6 @@ class TestDownloadAndParse(unittest.TestCase):
         if not Path(cls.path).is_file():
             downloader.download_all_on_day(cls.boxing_day, file=cls.path)
 
-
-    def test_download_on_day(self):
-        '''
-        Checks that the 19 boxing day scrapes get downloaded and parsed with the right dates.
-        '''
-        unpickled = self.unpickle_file(self.path)
-
-        self.assertEqual(19, len(unpickled))
-
-        for scrape in unpickled:
-            nums = scrape_parser.create_leg(scrape[0], next(iter(scrape[1].values())))
-            self.assertEqual(self.boxing_day, nums.request_time.date())
-
-
     def unpickle_file(self, path):
         with open(path, 'rb') as f:
             unpickled = pkl.load(f)
@@ -49,7 +35,7 @@ class TestDownloadAndParse(unittest.TestCase):
 
         for scrape in unpickled:
             for leg in filter(lambda l: l['stops'] == 0, scrape[1].values()):
-                nums = scrape_parser.create_leg(scrape[0], leg)
+                nums = scrape_parser.Leg(self.boxing_day, leg)
                 all_legs.append(nums)
 
         # todo use itertools#groupby to do this properly

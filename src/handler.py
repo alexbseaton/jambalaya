@@ -7,6 +7,8 @@ import boto3
 import pickle as pkl
 import io
 
+from src.scrape_parser import Leg
+
 s3_client = boto3.client('s3')
 
 
@@ -27,8 +29,9 @@ def scrape(n_tries, s3_bucket, departure_airport, arrival_airport, departure_dat
             legs = json.loads(raw_json["content"])['legs']
             if legs == {}:
                 raise ValueError("No data in script - maybe it sent us to a reCaptcha?")
-            flight_data = (dt.datetime.now().strftime("%d-%m-%y_%H_%M"), legs)
-            save_flight_data(flight_data, s3_bucket)
+            request_time = dt.datetime.now()
+            flight_data = [Leg(request_time, leg) for leg in legs.values()]
+            save_flight_data(request_time, flight_data, s3_bucket)
             print(flight_data)
             return flight_data
         except ValueError:
@@ -41,12 +44,11 @@ def get_raw_json(departure_airport, arrival_airport, departure_date):
             "economy&mode=search&origref=www.expedia.com".format(departure_airport, arrival_airport, departure_date)
     page = requests.get(url).text
     soup = BeautifulSoup(page, 'html.parser')
-
     return json.loads(soup.find(id="cachedResultsJson").string)
 
 
-def save_flight_data(flight_data, s3_bucket):
-    filename = "scrape_{}.pkl".format(flight_data[0])
+def save_flight_data(request_time, flight_data, s3_bucket):
+    filename = "scrape_{}.pkl".format(request_time.strftime("%d-%m-%y_%H_%M"))
     dump_to = io.BytesIO()
     pkl.dump(flight_data, dump_to)
     dump_to.seek(0) # got to drag the stream back to the beginning
