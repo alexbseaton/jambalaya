@@ -1,10 +1,12 @@
 import context
-from src import downloader
-from src import scrape_parser
+import downloader
+import scrape_parser
 import unittest
 import datetime
 import pickle as pkl
 from pathlib import Path
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot
 import matplotlib.dates
 
