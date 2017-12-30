@@ -14,13 +14,13 @@ class TestDownloadAndParse(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        ''' 
+        '''
         Download all the scrapes from boxing day and dump them in cls.path, if this hasn't been done already.
         If you change downloader it's a good idea to delete the stuff in cls.path so this starts from scratch.
         This is a bit rubbish but downloading everything takes a while.
         '''
         if not Path(cls.path).is_file():
-            downloader.download_all_on_day(cls.boxing_day, file = cls.path)
+            downloader.download_all_on_day(cls.boxing_day, file=cls.path)
 
 
     def test_download_on_day(self):
@@ -62,11 +62,11 @@ class TestDownloadAndParse(unittest.TestCase):
 
         request_order = sorted(same_as_first, key=lambda l: l.request_time)
 
-        datetimes = list(map(lambda l: l.request_time, request_order))
-        prices = list(map(lambda l: l.price, request_order))
+        datetimes = [leg.request_time for leg in request_order]
+        prices = [leg.price for leg in request_order]
         dates = matplotlib.dates.date2num(datetimes)
         matplotlib.pyplot.plot_date(dates, prices)
-        #matplotlib.pyplot.show()
+        matplotlib.pyplot.show()
 
 if __name__ == '__main__':
     unittest.main()

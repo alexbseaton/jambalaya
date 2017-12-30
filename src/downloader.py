@@ -7,6 +7,7 @@ from typing import List, Tuple
 
 Scrape = List[Tuple[str, dict]]
 
+
 def download_item(key: str) -> Scrape:
     ''' 
     Loads the item in the bucket with the given key.
@@ -23,7 +24,7 @@ def download_item(key: str) -> Scrape:
     bucket = s3.Bucket('alex-jambalaya-json-dumps')
     write_to = io.BytesIO()
     bucket.download_fileobj(key, write_to)
-    write_to.seek(0) # got to drag the stream back to the beginning
+    write_to.seek(0)  # got to drag the stream back to the beginning
     return pkl.load(write_to)
 
 
