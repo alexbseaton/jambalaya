@@ -13,3 +13,4 @@ aws-jambalaya-credentials.csv
 scraped_data/
 deployment/
 deployment-zip.zip
+scripts/lambdaoutput.txt

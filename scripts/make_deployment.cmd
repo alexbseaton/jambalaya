@@ -12,6 +12,7 @@ pip install -r deployment_requirements.txt -t ../deployment
 DEL deployment_requirements.txt
 
 xcopy ..\src\handler.py ..\deployment
+xcopy ..\src\scrape_parser.py ..\deployment
 "C:\Program Files\7-Zip\7z.exe" a ../deployment/deployment-zip.zip ../deployment/*
 
 

@@ -7,7 +7,7 @@ import boto3
 import pickle as pkl
 import io
 
-from src.scrape_parser import Leg
+from scrape_parser import Leg
 
 s3_client = boto3.client('s3')
 
