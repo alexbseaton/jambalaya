@@ -44,7 +44,7 @@ class Leg(object):
         return str(self.__dict__)
 
 
-def pull_numbers(time: str, leg: dict) -> Leg:
+def create_leg(time: str, leg: dict) -> Leg:
     """
     Takes a leg from the Expedia JSON and returns a more manageable object holding
     a subset of its data. 

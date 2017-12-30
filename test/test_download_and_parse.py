@@ -1,5 +1,6 @@
-from context import downloader
-from context import scrape_parser
+import context
+from src import downloader
+from src import scrape_parser
 import unittest
 import datetime
 import pickle as pkl
@@ -32,7 +33,7 @@ class TestDownloadAndParse(unittest.TestCase):
         self.assertEqual(19, len(unpickled))
 
         for scrape in unpickled:
-            nums = scrape_parser.pull_numbers(scrape[0], next(iter(scrape[1].values())))
+            nums = scrape_parser.create_leg(scrape[0], next(iter(scrape[1].values())))
             self.assertEqual(self.boxing_day, nums.request_time.date())
 
 
@@ -47,8 +48,8 @@ class TestDownloadAndParse(unittest.TestCase):
         all_legs = []
 
         for scrape in unpickled:
-            for leg in filter(lambda l: l['stops'] == 0, iter(scrape[1].values())):
-                nums = scrape_parser.pull_numbers(scrape[0], leg)
+            for leg in filter(lambda l: l['stops'] == 0, scrape[1].values()):
+                nums = scrape_parser.create_leg(scrape[0], leg)
                 all_legs.append(nums)
 
         # todo use itertools#groupby to do this properly
@@ -66,7 +67,7 @@ class TestDownloadAndParse(unittest.TestCase):
         prices = [leg.price for leg in request_order]
         dates = matplotlib.dates.date2num(datetimes)
         matplotlib.pyplot.plot_date(dates, prices)
-        matplotlib.pyplot.show()
+        # matplotlib.pyplot.show()
 
 if __name__ == '__main__':
     unittest.main()
