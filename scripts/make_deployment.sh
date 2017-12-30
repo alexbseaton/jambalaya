@@ -11,7 +11,7 @@ while read p; do
   pip3 install $p -t ./deployment
 done < ../deployment_requirements.in
 
-echo Adding handler to deployment
+echo Adding python scripts to deployment
 cp ../src/{handler.py,scrape_parser.py} ./deployment
 
 echo Zipping deployment
