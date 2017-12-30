@@ -12,7 +12,7 @@ while read p; do
 done < ../deployment_requirements.in
 
 echo Adding handler to deployment
-cp ../src/handler.py ./deployment
+cp ../src/{handler.py,scrape_parser.py} ./deployment
 
 echo Zipping deployment
 7z a ./deployment/deployment-zip.zip ./deployment/*
