@@ -24,26 +24,15 @@ logger.setLevel(logging.INFO)
 
 s3_client = boto3.client('s3')
 
+try:
+    conn = pymysql.connect(rds_config.rds_host, user=name, passwd=password, db=db_name, connect_timeout=5)
+    logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
+except:
+    logger.error("ERROR: Unexpected error: Could not connect to MySql instance.")
+    sys.exit()
 
 def my_handler(event, context):
-
-    # TODO: conn should be made outside of this method.
-    # It can't live outside ATM cos that would break the local tests- we need a test rds config.
-    try:
-        conn = pymysql.connect(rds_config.rds_host, user=name, passwd=password, db=db_name, connect_timeout=5)
-        logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
-    except:
-        logger.error("ERROR: Unexpected error: Could not connect to MySql instance.")
-        sys.exit()
-
-    with conn.cursor() as cur:
-        cur.execute("select * from Employee3")
-        item_count = 0
-        for row in cur:
-            item_count += 1
-            logger.info(row)
-            print(row)
-
+    select_query()
     S3BUCKET = os.environ['s3_bucket']
     n_tries = int(os.environ['n_tries'])
     departure_airport = os.environ['departure_airport']
@@ -51,6 +40,15 @@ def my_handler(event, context):
     departure_date = os.environ['mmddyyyy_date']
     scrape(n_tries, S3BUCKET, departure_airport, arrival_airport, departure_date)
     return {'message': 'Ran ok'}
+
+def select_query():
+    with conn.cursor() as cur:
+        cur.execute("select * from Employee3")
+        item_count = 0
+        for row in cur:
+            item_count += 1
+            logger.info(row)
+            print(row)
 
 
 def scrape(n_tries, s3_bucket, departure_airport, arrival_airport, departure_date):
