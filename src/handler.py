@@ -9,10 +9,41 @@ import io
 
 from scrape_parser import Leg
 
+import sys
+import logging
+import rds_config
+import pymysql
+
+#rds settings
+name = rds_config.db_username
+password = rds_config.db_password
+db_name = rds_config.db_name
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 s3_client = boto3.client('s3')
 
 
 def my_handler(event, context):
+
+    # TODO: conn should be made outside of this method.
+    # It can't live outside ATM cos that would break the local tests- we need a test rds config.
+    try:
+        conn = pymysql.connect(rds_config.rds_host, user=name, passwd=password, db=db_name, connect_timeout=5)
+        logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
+    except:
+        logger.error("ERROR: Unexpected error: Could not connect to MySql instance.")
+        sys.exit()
+
+    with conn.cursor() as cur:
+        cur.execute("select * from Employee3")
+        item_count = 0
+        for row in cur:
+            item_count += 1
+            logger.info(row)
+            print(row)
+
     S3BUCKET = os.environ['s3_bucket']
     n_tries = int(os.environ['n_tries'])
     departure_airport = os.environ['departure_airport']

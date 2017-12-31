@@ -7,12 +7,10 @@ echo Creating deployment directory
 mkdir deployment
 
 echo Installing dependencies
-while read p; do
-  pip3 install $p -t ./deployment
-done < ../deployment_requirements.in
+pip3 install -r ../deployment_requirements.in -t ./deployment
 
 echo Adding python scripts to deployment
-cp ../src/{handler.py,scrape_parser.py} ./deployment
+cp ../src/{handler.py,scrape_parser.py,rds_config.py} ./deployment
 
 echo Zipping deployment
 7z a ./deployment/deployment-zip.zip ./deployment/*
