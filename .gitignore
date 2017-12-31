@@ -14,3 +14,4 @@ scraped_data/
 deployment/
 deployment-zip.zip
 scripts/lambdaoutput.txt
+database-credentials.txt
