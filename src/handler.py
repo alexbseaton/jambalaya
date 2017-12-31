@@ -42,7 +42,14 @@ def my_handler(event, context):
     return {'message': 'Ran ok'}
 
 def select_query():
+    
     with conn.cursor() as cur:
+        # The first time that you run this, create the table first
+        #cur.execute("create table Employee3 ( EmpID  int NOT NULL, Name varchar(255) NOT NULL, PRIMARY KEY (EmpID))")  
+        #cur.execute('insert into Employee3 (EmpID, Name) values(1, "Joe")')
+        #cur.execute('insert into Employee3 (EmpID, Name) values(2, "Bob")')
+        #cur.execute('insert into Employee3 (EmpID, Name) values(3, "Mary")')
+        #conn.commit()
         cur.execute("select * from Employee3")
         item_count = 0
         for row in cur:
