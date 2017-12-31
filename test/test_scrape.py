@@ -1,5 +1,5 @@
 import context
-from src import handler
+import handler
 import unittest
 
 class TestScrape(unittest.TestCase):

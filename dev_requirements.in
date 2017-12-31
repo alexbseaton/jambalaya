@@ -5,3 +5,4 @@ datetime
 awscli
 typing
 matplotlib
+pymysql
