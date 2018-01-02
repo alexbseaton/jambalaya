@@ -1,6 +1,7 @@
 import context
 import downloader
 import leg
+from leg import Leg
 import unittest
 import datetime
 import pickle as pkl
@@ -9,53 +10,45 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot
 import matplotlib.dates
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import alchemy_utils
+import test_utils
+
 
 class TestDownloadAndParse(unittest.TestCase):
-    
-    path = '../data/boxing_day_scrapes.pkl'
-    boxing_day = datetime.date(year=2017, month=12, day=26)
 
-    @classmethod
-    def setUpClass(cls):
-        '''
-        Download all the scrapes from boxing day and dump them in cls.path, if this hasn't been done already.
-        If you change downloader it's a good idea to delete the stuff in cls.path so this starts from scratch.
-        This is a bit rubbish but downloading everything takes a while.
-        '''
-        if not Path(cls.path).is_file():
-            downloader.download_all_on_day(cls.boxing_day, file=cls.path)
+    download_day = datetime.date(year=2017, month=12, day=26)
 
-    def unpickle_file(self, path):
-        with open(path, 'rb') as f:
-            unpickled = pkl.load(f)
-        return unpickled
+    def setUp(self):
+        jsons = [test_utils.create_mock_leg_json(100.0, 2, 'LGW', 'MAD', datetime.datetime(2017, 2, 1), 2, 30, ['AB', 'CD']),\
+        test_utils.create_mock_leg_json(200.0, 2, 'LGW', 'MAD', datetime.datetime(2017, 2, 1), 2, 32, ['AB', 'CD']), # same flight\
+        test_utils.create_mock_leg_json(210.0, 2, 'LGW', 'MAD', datetime.datetime(2017, 2, 1), 2, 28, ['AB', 'CD']), # same flight\
+        test_utils.create_mock_leg_json(200.0, 2, 'LGW', 'GVA', datetime.datetime(2017, 2, 1), 2, 30, ['AB', 'CD']), # different arrival\
+        test_utils.create_mock_leg_json(200.0, 2, 'LHR', 'MAD', datetime.datetime(2017, 2, 1), 2, 30, ['AB', 'CD']), # different departure\
+        test_utils.create_mock_leg_json(200.0, 2, 'LGW', 'MAD', datetime.datetime(2017, 2, 1), 2, 32, ['AB', 'EF']), # different carriers\
+        test_utils.create_mock_leg_json(100.0, 2, 'LGW', 'MAD', datetime.datetime(2017, 2, 2), 2, 30, ['AB', 'CD'])] # different departure date
+        self.all_legs = [leg.create_leg(self.download_day + datetime.timedelta(days=i), jsons[i]) for i in range(len(jsons))]
 
-    
+
     def test_get_same_flight(self):
-        unpickled = self.unpickle_file(self.path)
-        all_legs = []
+        first = self.all_legs[0]
+        same_as_first = [l for l in self.all_legs if l.represents_same_leg(first)]
+        self.assertEqual(3, len(same_as_first), 'Should have this flight for the first three things in jsons')
 
-        for scrape in unpickled:
-            for leg in filter(lambda l: l['stops'] == 0, scrape[1].values()):
-                nums = leg.create_leg(self.boxing_day, leg)
-                all_legs.append(nums)
 
-        # todo use itertools#groupby to do this properly
-        first = all_legs[0]
-        same_as_first = []
-        for num in all_legs:
-            if num.represents_same_leg(first):
-                same_as_first.append(num)
+    def test_persist_leg(self):
+        first = self.all_legs[0]
+        #engine = create_engine('mysql+pymysql://root:password@localhost/jambalaya', echo=True)
+        engine = create_engine('sqlite://', echo=True) # in memory sqlite DB
+        alchemy_utils.Base.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        session.add(first)
+        session.commit()
+        loaded_leg = session.query(Leg).first()
+        self.assertEqual(first, loaded_leg)
 
-        self.assertEqual(19, len(same_as_first), 'Should have this flight for each of the 19 scrapes')
-
-        request_order = sorted(same_as_first, key=lambda l: l.request_time)
-
-        datetimes = [leg.request_time for leg in request_order]
-        prices = [leg.price for leg in request_order]
-        dates = matplotlib.dates.date2num(datetimes)
-        matplotlib.pyplot.plot_date(dates, prices)
-        # matplotlib.pyplot.show()
 
 if __name__ == '__main__':
     unittest.main()

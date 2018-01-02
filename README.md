@@ -1,20 +1,14 @@
 # jambalaya
 
 # Current Goal
-Graph the price of a particular flight over many requests.
-
-# Steps to improve repo
-1. PEP8 test
-2. Logging
-3. We should probably move to using a database to store this stuff 
-rather than putting it all in s3
+Move to storing the data in a DB rather than S3
 
 ## Installation
 For pinning dependencies, use pip-tools:
 
 *pip install pip-tools*
 
-Pip-tools updates your local environment with *exactly* packages specified in the requirements file. To use it:
+To use it:
 
 1. Update the requirements.in file. It should contain a list of all packages imported in the code.
 2. Run *pip-compile requirements.in* to compile a requirements.txt file
@@ -43,11 +37,6 @@ Pip-tools updates your local environment with *exactly* packages specified in th
 1. Activate your jambalaya environment
 2. Run *pip-compile dev_requirements.in*
 3. Run *pip-sync dev_requirements.txt*
-
-# Running the function on aws
-1. Upload from s3 bucket: https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
-2. Check that the region is London (eu-west-2). The region is displayed in top right of the screen,
-   in the menu bar, next to the account name.
 
 # Notes to self
 Use the named accounts (not the root) and make sure the location is London (eu-west-2) or the Lambda might go missing, which would be sad.
