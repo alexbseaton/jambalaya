@@ -4,9 +4,6 @@ import datetime
 Utilities to help development.
 """
 
-
-
-
 def create_mock_leg_json(price, n_stops, departure_airport, arrival_airport, depature_datetime, flight_hours, flight_minutes, carrier_codes):
     return {'price':{'totalPriceAsDecimal':str(price)}, 'stops':str(n_stops), 'departureLocation':{'airportCode':departure_airport},\
     'arrivalLocation':{'airportCode':arrival_airport}, 'departureTime':{'isoStr':depature_datetime.isoformat()}, 'duration':{'hours':flight_hours, 'minutes':flight_minutes},\

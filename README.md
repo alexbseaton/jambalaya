@@ -1,7 +1,7 @@
 # jambalaya
 
 # Current Goal
-Move to storing the data in a DB rather than S3
+Draw a graph of price over time using data from RDS
 
 ## Installation
 For pinning dependencies, use pip-tools:

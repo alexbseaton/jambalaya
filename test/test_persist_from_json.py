@@ -1,22 +1,16 @@
 import context
-import downloader
 import leg
 from leg import Leg
 import unittest
 import datetime
-import pickle as pkl
-from pathlib import Path
-import matplotlib
-matplotlib.use('agg')
-import matplotlib.pyplot
-import matplotlib.dates
+import handler
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import alchemy_utils
 import test_utils
 
 
-class TestDownloadAndParse(unittest.TestCase):
+class TestPersistFromJson(unittest.TestCase):
 
     download_day = datetime.date(year=2017, month=12, day=26)
 
@@ -48,6 +42,11 @@ class TestDownloadAndParse(unittest.TestCase):
         session.commit()
         loaded_leg = session.query(Leg).first()
         self.assertEqual(first, loaded_leg)
+
+
+    def test_save_to_local_db(self):
+        handler.scrape(5, 'LGW', 'MAD', '1/17/2018')
+
 
 
 if __name__ == '__main__':
