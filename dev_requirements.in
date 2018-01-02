@@ -7,4 +7,3 @@ typing
 matplotlib
 pymysql
 sqlalchemy
-mysql-python
