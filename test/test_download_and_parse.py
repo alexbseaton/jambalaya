@@ -37,7 +37,7 @@ class TestDownloadAndParse(unittest.TestCase):
 
         for scrape in unpickled:
             for leg in filter(lambda l: l['stops'] == 0, scrape[1].values()):
-                nums = scrape_parser.Leg(self.boxing_day, leg)
+                nums = scrape_parser.create_leg(self.boxing_day, leg)
                 all_legs.append(nums)
 
         # todo use itertools#groupby to do this properly

@@ -6,3 +6,5 @@ awscli
 typing
 matplotlib
 pymysql
+sqlalchemy
+mysql-python
