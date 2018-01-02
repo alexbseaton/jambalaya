@@ -43,22 +43,24 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
             legs = json.loads(raw_json["content"])['legs']
             if legs == {}:
                 raise ValueError("No data in script - maybe it sent us to a reCaptcha?")
-            request_time = dt.datetime.now()
-            session = Session()
-            try:
-                for leg_json in legs.values():
-                    l = leg.create_leg(request_time, leg_json)
-                    if (l.n_stops == 0):
-                        session.add(l)
-                # Should probably check some invariants before we do this commit
-                session.commit()
-            except:
-                session.rollback()
-                raise
-            finally:
-                session.close()
+            persist_legs(legs)
+            return
         except ValueError:
             print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
+
+
+def persist_legs(legs):
+    request_time = dt.datetime.now()
+    session = Session()
+    try:
+        all_legs = [leg.create_leg(request_time, leg_json) for leg_json in legs.values()]
+        session.add_all([l for l in all_legs if l.n_stops == 0])
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 def get_raw_json(departure_airport, arrival_airport, departure_date):
