@@ -15,4 +15,4 @@ deployment/
 deployment-zip.zip
 scripts/lambdaoutput.txt
 database-credentials.txt
-rds_config.py
+src/rds_config.py
