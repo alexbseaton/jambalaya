@@ -1,7 +1,7 @@
 import context
 import handler
-import scrape_parser
-from scrape_parser import Leg
+import leg
+from leg import Leg
 import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -22,7 +22,6 @@ class TestAlchemy(unittest.TestCase):
 
         session = Session()
         session.add(leg)
-
         session.commit()
         loaded_leg = session.query(Leg).filter_by(request_time=request_time).first()
 

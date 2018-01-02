@@ -11,7 +11,7 @@ import sys
 import logging
 import rds_config
 import pymysql
-import scrape_parser
+import leg
 
 #rds settings
 name = rds_config.db_username
@@ -65,7 +65,7 @@ def scrape(n_tries, s3_bucket, departure_airport, arrival_airport, departure_dat
             if legs == {}:
                 raise ValueError("No data in script - maybe it sent us to a reCaptcha?")
             request_time = dt.datetime.now()
-            flight_data = [scrape_parser.create_leg(request_time, leg) for leg in legs.values()]
+            flight_data = [leg.create_leg(request_time, leg) for leg in legs.values()]
             save_flight_data(request_time, flight_data, s3_bucket)
             print(flight_data)
             return flight_data

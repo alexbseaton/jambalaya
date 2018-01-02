@@ -10,7 +10,7 @@ echo Installing dependencies
 pip3 install -r ../deployment_requirements.in -t ./deployment
 
 echo Adding python scripts to deployment
-cp ../src/{handler.py,scrape_parser.py,rds_config.py} ./deployment
+cp ../src/{handler.py,leg.py,rds_config.py} ./deployment
 
 echo Zipping deployment
 7z a ./deployment/deployment-zip.zip ./deployment/*
