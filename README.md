@@ -1,7 +1,7 @@
 # jambalaya
 
 # Current Goal
-Draw a graph of price over time using data from RDS
+Grab data for several routes for dates a fair way in to the future
 
 ## Installation
 For pinning dependencies, use pip-tools:

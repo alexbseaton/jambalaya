@@ -47,7 +47,9 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
             session = Session()
             try:
                 for leg_json in legs.values():
-                    session.add(leg.create_leg(request_time, leg_json))
+                    l = leg.create_leg(request_time, leg_json)
+                    if (l.n_stops == 0):
+                        session.add(l)
                 # Should probably check some invariants before we do this commit
                 session.commit()
             except:
