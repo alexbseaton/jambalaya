@@ -31,8 +31,11 @@ def my_handler(event, context):
     n_tries = int(os.environ['n_tries'])
     departure_airport = os.environ['departure_airport']
     arrival_airport = os.environ['arrival_airport']
-    departure_date = os.environ['mmddyyyy_date']
-    scrape(n_tries, departure_airport, arrival_airport, departure_date)
+    day_count = os.environ['day_count']
+    for departure_date in (dt.datetime.now() + dt.timedelta(days=n+7) for n in range(int(day_count))):
+        mmddyyyy_date = departure_date.strftime('%m/%d/%Y')
+        print('Date in request:\n'+mmddyyyy_date+'\n\n')
+        scrape(n_tries, departure_airport, arrival_airport, mmddyyyy_date)
     return {'message': 'Ran ok'}
 
 
@@ -54,6 +57,10 @@ def persist_legs(legs):
     session = Session()
     try:
         all_legs = [leg.create_leg(request_time, leg_json) for leg_json in legs.values()]
+        
+        for l in all_legs:
+            print('Departure date: \n{}\n\n'.format(l.departure_date))
+        
         session.add_all([l for l in all_legs if l.n_stops == 0])
         session.commit()
     except:
@@ -67,6 +74,9 @@ def get_raw_json(departure_airport, arrival_airport, departure_date):
     url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
             "{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3A"\
             "economy&mode=search&origref=www.expedia.com".format(departure_airport, arrival_airport, departure_date)
+    
+    print('url:\n{}\n\n'.format(url))
+    
     page = requests.get(url).text
     soup = BeautifulSoup(page, 'html.parser')
     return json.loads(soup.find(id="cachedResultsJson").string)
