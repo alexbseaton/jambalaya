@@ -9,13 +9,11 @@ url = "https://pypi.python.org/simple"
 
 "bs4" = "*"
 requests = "*"
-"boto3" = "*"
-datetime = "*"
-awscli = "*"
+DateTime = "*"
 typing = "*"
-matplotlib = "*"
-pymysql = "*"
-sqlalchemy = "*"
+PyMySQL = "*"
+SQLAlchemy = "*"
+"traceback2" = "*"
 
 
 [dev-packages]
