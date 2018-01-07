@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import sys
 import logging
 import traceback
+import time
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -47,12 +48,6 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
 def persist_legs(legs, departure_date):
     session = Session()
     
-    # Sanity check- the stuff we're saving should have the departure date we asked for
-    for l in legs:
-        print('Departure date: \n{}\n\n'.format(l.departure_date))
-        print('Expected:{}'.format(departure_date))
-        assert l.departure_date.date() == departure_date.date()
-    
     try:
         session.add_all(legs)
         session.commit()
@@ -91,12 +86,12 @@ def get_legs(departure_airport, arrival_airport, departure_date):
 def main():
     departure_airport = 'LGW'
     arrival_airports = ['MAD', 'AMS']
-    n_tries = 3
-    day_count = 1
+    n_tries = 10
+    day_count = 100
     for departure_date in (dt.datetime.now() + dt.timedelta(days=n+7) for n in range(day_count)):
         for arrival_airport in arrival_airports:
             print(scrape(n_tries, departure_airport, arrival_airport, departure_date))
+        time.sleep(2)
 
 if __name__ == '__main__':
     main()
-    
