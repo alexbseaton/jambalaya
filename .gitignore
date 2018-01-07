@@ -7,6 +7,7 @@ __pycache__
 .idea/
 .vscode/.ropeproject/config.py
 
+connect_to_ec2.sh
 
 # AWS
 aws-jambalaya-credentials.csv
