@@ -6,6 +6,7 @@ __pycache__
 # IDE files
 .idea/
 .vscode/.ropeproject/config.py
+settings.json
 
 connect_to_ec2.sh
 
