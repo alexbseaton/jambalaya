@@ -77,7 +77,7 @@ class TestPersistFromJson(unittest.TestCase):
 
 
     def test_save_to_local_db(self):
-        handler.scrape(5, 'LGW', 'MAD', '1/17/2018')
+        handler.scrape(5, 'LGW', 'MAD', '3/17/2018')
 
 
 
