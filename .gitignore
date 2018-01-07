@@ -1,6 +1,6 @@
 # files to be ignored by git
-PipFile*
 __pycache__
+*.pyc
 *.DS_Store
 
 # IDE files
