@@ -1,21 +1,14 @@
 # jambalaya
 
-# Steps to build engine
-1. Find source: Expedia
-2. Scrape flight prices
-3. ...
-
-# Steps to improve repo
-1. Write PEP8 test (PEP8 failures, minimal print statements)
-2. Create logger
-3. Decouple test and source code....
+# Current Goal
+Grab data for several routes for dates a fair way in to the future
 
 ## Installation
-For pinning dependencies, we use pip-tools:
+For pinning dependencies, use pip-tools:
 
 *pip install pip-tools*
 
-Pip-tools allows you to ensure that your local environment contains *exactly* packages specified in the requirements file. In general, the usage of pip-tools is:
+To use it:
 
 1. Update the requirements.in file. It should contain a list of all packages imported in the code.
 2. Run *pip-compile requirements.in* to compile a requirements.txt file
@@ -33,9 +26,10 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
 5. Configure the aws command line interface
 
 # Deployment Installation - Automated
-- Run *make_deployment.cmd* to automate steps 1-4 of the manual deployment installation
-- Note: you must have pip-tools installed in your environment (see above)
+- Run *make_deployment.cmd*
+- Note: you must have pip installed in your environment
 - Note: you must have the programme 7zip installed at C:\Program Files\7-Zip\7z.exe
+- Note: your AWS account details must be saved as the default profile in the AWS CLI
 - Note: the script currently deletes the deployment folder and starts fresh by re-downloading all
   packages. This could probably be avoided.
 
@@ -44,7 +38,5 @@ Pip-tools allows you to ensure that your local environment contains *exactly* pa
 2. Run *pip-compile dev_requirements.in*
 3. Run *pip-sync dev_requirements.txt*
 
-# Running the function on aws
-1. Upload from s3 bucket: https://s3.amazonaws.com/alex-jambalaya-json-dumps/deployment-zip.zip
-2. Check that the region is London (eu-west-2). The region is displayed in top right of the screen,
-   in the menu bar, next to the account name.
+# Notes to self
+Use the named accounts (not the root) and make sure the location is London (eu-west-2) or the Lambda might go missing, which would be sad.
