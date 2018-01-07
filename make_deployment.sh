@@ -10,5 +10,4 @@ pip install -r deployment_requirements.txt -t deployment
 cp src/handler.py deployment
 zip deployment-zip.zip deployment/*
 
-aws s3 cp deployment-zip.zip s3://alex-jambalaya-json-dumps
-aws lambda update-function-code --function-name my_function --s3-bucket alex-jambalaya-json-dumps --s3-key deployment-zip.zip
+aws s3 cp deployment-zip.zip s3://alex-jambalaya-json-dumps/
