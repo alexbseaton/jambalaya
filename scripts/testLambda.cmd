@@ -1,1 +1,0 @@
-aws lambda invoke --function-name my_function lambdaoutput.txt

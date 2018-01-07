@@ -27,18 +27,6 @@ except Exception as e:
 
 
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
-def my_handler(event, context):
-    n_tries = int(os.environ['n_tries'])
-    departure_airport = os.environ['departure_airport']
-    arrival_airport = os.environ['arrival_airport']
-    day_count = os.environ['day_count']
-    for departure_date in (dt.datetime.now() + dt.timedelta(days=n+7) for n in range(int(day_count))):
-        mmddyyyy_date = departure_date.strftime('%m/%d/%Y')
-        print('Date in request:\n'+mmddyyyy_date+'\n\n')
-        scrape(n_tries, departure_airport, arrival_airport, mmddyyyy_date)
-    return {'message': 'Ran ok'}
-
-
 def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
