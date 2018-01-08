@@ -4,7 +4,7 @@ import dateutil.parser
 from typing import List
 import alchemy_utils
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Sequence, Float, DateTime, Interval, ForeignKey
+from sqlalchemy import Column, Integer, String, Sequence, Float, DateTime, Interval, ForeignKey, DECIMAL
 
 
 class Leg(alchemy_utils.Base):
@@ -20,7 +20,7 @@ class Leg(alchemy_utils.Base):
     """
     __tablename__ = 'leg'
     id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
-    price = Column(Float())
+    price = Column(DECIMAL(15,2))
     departure_location = Column(String(3))
     arrival_location = Column(String(3))
     departure_date = Column(DateTime())
