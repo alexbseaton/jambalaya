@@ -1,8 +1,7 @@
 # jambalaya
 
 # Current Goal
-Sort out the cachedResultsJson problem: the data inside it doesn't always correspond to what's on screen
-
+Draw some graphs of the database
 
 # Developer Installation
 1. Go to the jambalaya folder
