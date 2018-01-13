@@ -18,3 +18,4 @@ deployment/
 deployment-zip.zip
 scripts/lambdaoutput.txt
 database-credentials.txt
+ec2instance.pem
