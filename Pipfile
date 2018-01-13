@@ -1,0 +1,20 @@
+[[source]]
+
+name = "pypi"
+verify_ssl = true
+url = "https://pypi.python.org/simple"
+
+
+[packages]
+
+"bs4" = "*"
+requests = "*"
+DateTime = "*"
+typing = "*"
+PyMySQL = "*"
+SQLAlchemy = "*"
+"traceback2" = "*"
+
+
+[dev-packages]
+

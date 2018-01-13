@@ -1,0 +1,1 @@
+rsync -rave "ssh -i ../../ec2instance.pem" /mnt/c/source/jambalaya/jambalaya ubuntu@ec2-52-56-74-53.eu-west-2.compute.amazonaws.com:/home/ubuntu/

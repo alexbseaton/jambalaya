@@ -1,12 +1,15 @@
 # files to be ignored by git
-PipFile*
 __pycache__
+*.pyc
 *.DS_Store
+log.log
 
 # IDE files
 .idea/
 .vscode/.ropeproject/config.py
+settings.json
 
+connect_to_ec2.sh
 
 # AWS
 aws-jambalaya-credentials.csv

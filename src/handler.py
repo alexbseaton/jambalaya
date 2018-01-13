@@ -5,21 +5,36 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 import logging
+import traceback
+import time
+import itertools
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+import alchemy_utils
 import rds_config
 import leg
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Console handler
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+# File handler
+fh = logging.FileHandler('log.log')
+fh.setLevel(logging.ERROR)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 try:
     connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username, password=rds_config.db_password, host=rds_config.rds_host, db_name=rds_config.db_name)
-    engine = create_engine(connection, echo=True)
-    #alchemy_utils.Base.metadata.create_all(engine)
+    engine = create_engine(connection)
+    alchemy_utils.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
 except Exception as e:
     logger.error("ERROR: Unexpected error: Could not connect to MySql instance.\t{}".format(e))
@@ -27,60 +42,71 @@ except Exception as e:
 
 
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
-def my_handler(event, context):
-    n_tries = int(os.environ['n_tries'])
-    departure_airport = os.environ['departure_airport']
-    arrival_airport = os.environ['arrival_airport']
-    day_count = os.environ['day_count']
-    for departure_date in (dt.datetime.now() + dt.timedelta(days=n+7) for n in range(int(day_count))):
-        mmddyyyy_date = departure_date.strftime('%m/%d/%Y')
-        print('Date in request:\n'+mmddyyyy_date+'\n\n')
-        scrape(n_tries, departure_airport, arrival_airport, mmddyyyy_date)
-    return {'message': 'Ran ok'}
-
-
 def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
-            raw_json = get_raw_json(departure_airport, arrival_airport, departure_date)
-            legs = json.loads(raw_json["content"])['legs']
-            if legs == {}:
-                raise ValueError("No data in script - maybe it sent us to a reCaptcha?")
-            persist_legs(legs)
-            return
-        except ValueError:
-            print('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
+            legs = get_legs(departure_airport, arrival_airport, departure_date)
+            if legs == []:
+                raise ValueError("No results")
+            persist_legs(legs, departure_date)
+            return 'Scraping successful'
+        except Exception as e:
+            logger.error('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
+            traceback.print_exc()
+    return logger.error('All attempts failed for DEP:\t{}\nARR:\t{}\nDate:\t{}'.format(departure_airport, arrival_airport, departure_date))
 
 
-def persist_legs(legs):
-    request_time = dt.datetime.now()
+def persist_legs(legs, departure_date):
     session = Session()
     try:
-        all_legs = [leg.create_leg(request_time, leg_json) for leg_json in legs.values()]
-        
-        for l in all_legs:
-            print('Departure date: \n{}\n\n'.format(l.departure_date))
-        
-        session.add_all([l for l in all_legs if l.n_stops == 0])
+        session.add_all(legs)
         session.commit()
+        logger.info('Committed')
     except:
         session.rollback()
+        logger.error('Rollback')
         raise
     finally:
         session.close()
 
 
-def get_raw_json(departure_airport, arrival_airport, departure_date):
-    url =   "https://www.expedia.com/Flights-Search?trip=oneway&leg1=from:"\
-            "{0},to:{1},departure:{2}TANYT&passengers=adults:1,children:0,seniors:0,infantinlap:Y&options=cabinclass%3A"\
-            "economy&mode=search&origref=www.expedia.com".format(departure_airport, arrival_airport, departure_date)
+def get_legs(departure_airport, arrival_airport, departure_date):
+    mmddyyyy_date = departure_date.strftime('%d/%m/%Y')
+    url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(departure_airport, arrival_airport, mmddyyyy_date)
+
+    logger.info('url:{}'.format(url))
     
-    print('url:\n{}\n\n'.format(url))
-    
-    page = requests.get(url).text
+    request_time = dt.datetime.now()
+    response = requests.get(url)
+    page = response.text
     soup = BeautifulSoup(page, 'html.parser')
-    return json.loads(soup.find(id="cachedResultsJson").string)
+    result = []
+    for t in soup.find_all('li', {'class':'flight-module segment offer-listing'}):
+        raw_duration = t.find('span', {'class':'total-duration duration-emphasis'}).contents[0].strip()
+        d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
+        if (d.hour > 2): # don't save these long running ones
+            continue
+        duration = dt.timedelta(hours=d.hour, minutes=d.minute)
+        raw_departure_time = t.find('span', {'data-test-id':'departure-time'}).contents[0].strip()
+        departure_time = dt.datetime.combine(departure_date, dt.datetime.strptime(raw_departure_time, "%H:%M").time())
+        raw_price = t.find('div', {'class':'price-column'}).attrs['data-test-price-per-traveler']
+        price = float(raw_price.strip('£'))
+        airline = t.find('span', {'data-test-id':'airline-name'}).contents[0].strip()
+        result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport, departure_date=departure_time, \
+        request_time=request_time, duration=duration, airline=airline))
+    return result
+
+
+def main():
+    departure = 'LGW'
+    busy_airports = ['MAD', 'CDG', 'AMS', 'FCO', 'DUB']
+    n_tries = 10
+    day_count = 180
+    for arrival in busy_airports:
+        for departure_date in (dt.datetime.now() + dt.timedelta(days=n+1) for n in range(day_count)):
+            scrape(n_tries, departure, arrival, departure_date)
+            scrape(n_tries, arrival, departure, departure_date)
 
 
 if __name__ == '__main__':
-    scrape(1, 'LGW', 'MAD', '2/2/2018')
+    main()
