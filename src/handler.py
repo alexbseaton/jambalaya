@@ -83,7 +83,7 @@ def get_legs(departure_airport, arrival_airport, departure_date):
     logger.info('url:{}'.format(url))
     
     driver.get(url)
-    time.sleep(5) # let the JS run
+    time.sleep(10) # let the JS run
     request_time = dt.datetime.now()
     page = driver.page_source
     soup = BeautifulSoup(page, 'html.parser')
