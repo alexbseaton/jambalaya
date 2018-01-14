@@ -2,4 +2,5 @@
 cd /home/ubuntu/jambalaya
 git checkout master
 git pull
+pipenv install --ignore-pipfile
 pipenv run python src/handler.py
