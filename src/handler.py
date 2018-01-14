@@ -116,7 +116,7 @@ def main():
     departure = 'LGW'
     busy_airports = ['MAD', 'CDG', 'AMS', 'FCO', 'DUB']
     n_tries = 1
-    day_count = 1
+    day_count = 180
     for arrival in busy_airports:
         for departure_date in (dt.datetime.now() + dt.timedelta(days=n+1) for n in range(day_count)):
             scrape(n_tries, departure, arrival, departure_date)
