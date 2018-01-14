@@ -1,7 +1,6 @@
 import os
 import datetime as dt
 import json
-import requests
 from bs4 import BeautifulSoup
 import sys
 import logging
@@ -15,6 +14,8 @@ from sqlalchemy.orm import sessionmaker
 import alchemy_utils
 import rds_config
 import leg
+
+from selenium import webdriver
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -30,6 +31,7 @@ fh.setLevel(logging.ERROR)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
+driver = webdriver.PhantomJS()
 
 try:
     connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username, password=rds_config.db_password, host=rds_config.rds_host, db_name=rds_config.db_name)
@@ -70,38 +72,51 @@ def persist_legs(legs, departure_date):
         session.close()
 
 
+def has_data_test_id(id, tag):
+    key = "data-test-id"
+    return key in tag.attrs and tag.attrs[key] == id
+
+
 def get_legs(departure_airport, arrival_airport, departure_date):
     mmddyyyy_date = departure_date.strftime('%d/%m/%Y')
     url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(departure_airport, arrival_airport, mmddyyyy_date)
-
     logger.info('url:{}'.format(url))
     
+    driver.get(url)
+    time.sleep(5) # let the JS run
     request_time = dt.datetime.now()
-    response = requests.get(url)
-    page = response.text
+    page = driver.page_source
     soup = BeautifulSoup(page, 'html.parser')
+
     result = []
     for t in soup.find_all('li', {'class':'flight-module segment offer-listing'}):
-        raw_duration = t.find('span', {'class':'total-duration duration-emphasis'}).contents[0].strip()
+        # Duration
+        raw_duration = t.find(lambda d: has_data_test_id("duration", d)).contents[0].strip()
         d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
         if (d.hour > 2): # don't save these long running ones
             continue
         duration = dt.timedelta(hours=d.hour, minutes=d.minute)
-        raw_departure_time = t.find('span', {'data-test-id':'departure-time'}).contents[0].strip()
+        # Departure time
+        raw_departure_time = t.find(lambda d: has_data_test_id('departure-time', d)).contents[0].strip()
         departure_time = dt.datetime.combine(departure_date, dt.datetime.strptime(raw_departure_time, "%H:%M").time())
-        raw_price = t.find('div', {'class':'price-column'}).attrs['data-test-price-per-traveler']
+        # Price per traveller
+        ppt = 'data-test-price-per-traveler'
+        raw_price = t.find(lambda d: ppt in d.attrs).attrs[ppt]
         price = float(raw_price.strip('£'))
-        airline = t.find('span', {'data-test-id':'airline-name'}).contents[0].strip()
+        # Airline
+        airline = t.find(lambda d: has_data_test_id('airline-name', d)).contents[0].strip()
+        # Create the record
         result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport, departure_date=departure_time, \
         request_time=request_time, duration=duration, airline=airline))
+
     return result
 
 
 def main():
     departure = 'LGW'
     busy_airports = ['MAD', 'CDG', 'AMS', 'FCO', 'DUB']
-    n_tries = 10
-    day_count = 180
+    n_tries = 1
+    day_count = 1
     for arrival in busy_airports:
         for departure_date in (dt.datetime.now() + dt.timedelta(days=n+1) for n in range(day_count)):
             scrape(n_tries, departure, arrival, departure_date)

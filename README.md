@@ -1,9 +1,11 @@
 # jambalaya
 
 # Current Goal
-Draw some graphs of the database
+Get reliable data
 
 # Developer Installation
-1. Go to the jambalaya folder
-2. Run 'pipenv install --dev'
-3. Run 'pipenv shell' to activate the virtual environment
+Install PhantomJS and put it on your PATH.
+
+Go to the jambalaya folder
+Run 'pipenv install --dev'
+Run 'pipenv shell' to activate the virtual environment
