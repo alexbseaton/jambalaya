@@ -12,8 +12,8 @@ import numpy as np
 
 class TestPersist(unittest.TestCase):
 
-    def test_save_to_local(self):
-        for i in range(10):
+    def test_save_to_local(self): 
+        for i in range(2):
             handler.scrape(1, 'LGW', 'DUB', datetime.datetime.now() + datetime.timedelta(days=7+i))
 
     def test_random_sample(self):
@@ -23,7 +23,6 @@ class TestPersist(unittest.TestCase):
         pick = np.random.randint(len(b), size=6)
         for sample in b[pick]:
             print('\nDeparture date: {}\nPrice: {}\nFrom: {}\nTo: {}\nAirline: {}'.format(sample.departure_date, sample.price, sample.departure_location, sample.arrival_location, sample.airline))
-
 
 
     def test_persist_leg(self):

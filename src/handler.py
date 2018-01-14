@@ -7,6 +7,7 @@ import logging
 import traceback
 import time
 import itertools
+import numpy as np
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -16,6 +17,7 @@ import rds_config
 import leg
 
 from selenium import webdriver
+from selenium.common import exceptions as s_exceptions
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,7 +33,6 @@ fh.setLevel(logging.ERROR)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-driver = webdriver.PhantomJS()
 
 try:
     connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username, password=rds_config.db_password, host=rds_config.rds_host, db_name=rds_config.db_name)
@@ -78,12 +79,21 @@ def has_data_test_id(id, tag):
 
 
 def get_legs(departure_airport, arrival_airport, departure_date):
+    driver = webdriver.PhantomJS()
+    driver.set_page_load_timeout(10)
+
     mmddyyyy_date = departure_date.strftime('%d/%m/%Y')
     url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(departure_airport, arrival_airport, mmddyyyy_date)
     logger.info('url:{}'.format(url))
     
-    driver.get(url)
+    try:
+        driver.get(url)
+    except s_exceptions.TimeoutException:
+        time.sleep(60)
+        raise
+
     time.sleep(10) # let the JS run
+
     request_time = dt.datetime.now()
     page = driver.page_source
     soup = BeautifulSoup(page, 'html.parser')
@@ -109,18 +119,23 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport, departure_date=departure_time, \
         request_time=request_time, duration=duration, airline=airline))
 
+    driver.delete_all_cookies()
+    driver.quit()
+
     return result
 
 
 def main():
     departure = 'LGW'
     busy_airports = ['MAD', 'CDG', 'AMS', 'FCO', 'DUB']
-    n_tries = 1
+    n_tries = 2
     day_count = 180
-    for arrival in busy_airports:
-        for departure_date in (dt.datetime.now() + dt.timedelta(days=n+1) for n in range(day_count)):
-            scrape(n_tries, departure, arrival, departure_date)
-            scrape(n_tries, arrival, departure, departure_date)
+    input = [(airport, n) for airport in busy_airports for n in range(day_count)]
+    np.random.shuffle(input)
+    for arrival, n in input:
+        departure_date = dt.datetime.now() + dt.timedelta(days=n+1)
+        scrape(n_tries, departure, arrival, departure_date)
+        scrape(n_tries, arrival, departure, departure_date)
 
 
 if __name__ == '__main__':
