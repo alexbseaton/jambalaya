@@ -1,12 +1,13 @@
 # jambalaya
 
-# Current Goal
+## Current Goal
 Get reliable data
 
-# Installation
+## Installation
 Install PhantomJS and put it on your PATH.
+Install pipenv.
 
 Go to the jambalaya folder and:
 
-    * Run _pipenv install --dev_
-    * Run _pipenv shell_ to activate the virtual environment
+* Run *pipenv install --dev*
+* Run *pipenv shell* to activate the virtual environment
