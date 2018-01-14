@@ -11,9 +11,8 @@ import alchemy_utils
 
 class TestPersist(unittest.TestCase):
 
-    def test_save_to_local_db(self):
-        handler.main()
-
+    def test_save_to_local(self):
+        handler.scrape(5, 'LGW', 'MAD', datetime.datetime.now() + datetime.timedelta(days=7))
 
     def test_persist_leg(self):
         leg = self._create_leg()
