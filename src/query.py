@@ -31,8 +31,8 @@ l = session.query(Leg).\
     filter(Leg.departure_location == 'LGW').\
     filter(Leg.arrival_location == 'DUB').\
     filter(Leg.airline == 'Aer Lingus').\
-    filter(Leg.request_time >= datetime(2018,1,12,0,0,0)).\
-    filter(Leg.request_time < datetime(2018, 1, 13, 0, 0, 0))
+    filter(Leg.request_time >= datetime(2018,1,15,0,0,0)).\
+    filter(Leg.request_time < datetime(2018, 1, 16, 0, 0, 0))
 
 same = [leg for leg in l if leg.departure_date.time() == time(19, 15)]
 
