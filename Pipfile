@@ -8,12 +8,13 @@ url = "https://pypi.python.org/simple"
 [packages]
 
 "bs4" = "*"
-DateTime = "*"
+datetime = "*"
 typing = "*"
-PyMySQL = "*"
-SQLAlchemy = "*"
+pymysql = "*"
+sqlalchemy = "*"
 "traceback2" = "*"
 selenium = "*"
+jupyter = "*"
 
 
 [dev-packages]

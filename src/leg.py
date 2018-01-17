@@ -39,5 +39,42 @@ class Leg(alchemy_utils.Base):
         self.departure_date == other.departure_date
 
 
+    def similar_flights(self, all_legs):
+        """
+        Those legs representing the same flight as this one, just with data
+        gathered at a different time.
+
+        Args:
+            all_legs: An iterable of Leg objects to compare to this one
+        Returns:
+            A list of the legs in all_legs that are similar to this one
+        """
+        return [f for f in all_legs if f.represents_same_leg(self)]
+
+
     def __repr__(self):
         return str(self.__dict__)
+
+
+def make_groups(legs):
+    """
+    Gives a list of lists of legs that all represent the same flight.
+    See the similar_flights method of Leg.
+
+    Args:
+        legs: the legs to group into lists that are the same flight
+    Returns:
+        A list of lists of Leg objects where all the elements in each sub-list
+        represent the same flight.
+    """
+    grouped = []
+    matched = {leg:False for leg in legs}
+    for leg in l:
+        if matched[leg]:
+            continue
+        sim = leg.similar_flights(legs)
+        grouped.append(sim)
+        for s in sim:
+            matched[s] = True
+
+    return grouped

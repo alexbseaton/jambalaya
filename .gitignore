@@ -19,3 +19,5 @@ deployment-zip.zip
 scripts/lambdaoutput.txt
 database-credentials.txt
 ec2instance.pem
+src/.ipynb_checkpoints/queries-checkpoint.ipynb
+.vscode/.ropeproject/objectdb
