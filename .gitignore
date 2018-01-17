@@ -11,6 +11,8 @@ settings.json
 
 connect_to_ec2.sh
 
+rds_creds.txt
+
 # AWS
 aws-jambalaya-credentials.csv
 scraped_data/
