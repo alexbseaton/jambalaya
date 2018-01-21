@@ -15,7 +15,6 @@ sqlalchemy = "*"
 "traceback2" = "*"
 selenium = "*"
 jupyter = "*"
-numpy = "*"
 
 
 [dev-packages]
