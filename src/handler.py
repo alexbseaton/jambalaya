@@ -1,12 +1,9 @@
-import os
 import datetime as dt
-import json
 from bs4 import BeautifulSoup
 import sys
 import logging
 import traceback
 import time
-import itertools
 import numpy as np
 
 from sqlalchemy import create_engine
@@ -39,12 +36,12 @@ try:
     engine = create_engine(connection)
     alchemy_utils.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
+    logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 except Exception as e:
     logger.error("ERROR: Unexpected error: Could not connect to MySql instance.\t{}".format(e))
     sys.exit()
 
 
-logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
@@ -59,13 +56,13 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     return logger.error('All attempts failed for DEP:\t{}\nARR:\t{}\nDate:\t{}'.format(departure_airport, arrival_airport, departure_date))
 
 
-def persist_legs(legs, departure_date):
+def persist_legs(legs):
     session = Session()
     try:
         session.add_all(legs)
         session.commit()
         logger.info('Committed')
-    except:
+    except Exception:
         session.rollback()
         logger.error('Rollback')
         raise
@@ -92,7 +89,7 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         time.sleep(60)
         raise
 
-    time.sleep(10) # let the JS run
+    time.sleep(10)  # let the JS run
 
     request_time = dt.datetime.now()
     page = driver.page_source
@@ -103,21 +100,23 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         # Duration
         raw_duration = t.find(lambda d: has_data_test_id("duration", d)).contents[0].strip()
         d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
-        if (d.hour > 2): # don't save these long running ones
+        if d.hour > 2:  # don't save these long running ones
             continue
         duration = dt.timedelta(hours=d.hour, minutes=d.minute)
-        # Departure time
+
         raw_departure_time = t.find(lambda d: has_data_test_id('departure-time', d)).contents[0].strip()
         departure_time = dt.datetime.combine(departure_date, dt.datetime.strptime(raw_departure_time, "%H:%M").time())
+
         # Price per traveller
         ppt = 'data-test-price-per-traveler'
         raw_price = t.find(lambda d: ppt in d.attrs).attrs[ppt]
         price = float(raw_price.strip('£'))
-        # Airline
-        airline = t.find(lambda d: has_data_test_id('airline-name', d)).contents[0].strip()
+
+        airline = t.find(lambda x: has_data_test_id('airline-name', x)).contents[0].strip()
+
         # Create the record
-        result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport, departure_date=departure_time, \
-        request_time=request_time, duration=duration, airline=airline))
+        result.append(leg.Leg(price, departure_airport, arrival_airport, departure_time, request_time, duration,
+                              airline))
 
     driver.delete_all_cookies()
     driver.quit()
