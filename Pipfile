@@ -16,6 +16,8 @@ sqlalchemy = "*"
 selenium = "*"
 jupyter = "*"
 pandas = "*"
+keras = "*"
+tensorflow = "*"
 
 
 [dev-packages]
