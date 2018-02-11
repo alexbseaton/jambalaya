@@ -109,8 +109,8 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         # Duration
         raw_duration = t.find(lambda d: has_data_test_id("duration", d)).contents[0].strip()
         d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
-        if d.hour > 2:  # don't save these long running ones  TODO: why? Are all our flights really short?
-            continue
+        if d.hour > 2:  # don't save these long running ones
+            continue  # TODO: this might cause problems if we start looking at long haul flights!
         duration = dt.timedelta(hours=d.hour, minutes=d.minute)
         # Departure time
         raw_departure_time = t.find(lambda d: has_data_test_id('departure-time', d)).contents[0].strip()
