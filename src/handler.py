@@ -39,33 +39,36 @@ try:
     engine = create_engine(connection)
     alchemy_utils.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
+    logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 except Exception as e:
     logger.error("ERROR: Unexpected error: Could not connect to MySql instance.\t{}".format(e))
     sys.exit()
 
 
-logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
 def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
             legs = get_legs(departure_airport, arrival_airport, departure_date)
-            if legs == []:
-                raise ValueError("No results")
+            if legs is []:
+                raise ValueError("No results.")
             persist_legs(legs, departure_date)
-            return 'Scraping successful'
-        except Exception as e:
+            return 'Scrape successful.'
+        except Exception as e:  # TODO: import the TimeoutException class and except it and ValueError explicitly
             logger.error('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
             traceback.print_exc()
-    return logger.error('All attempts failed for DEP:\t{}\nARR:\t{}\nDate:\t{}'.format(departure_airport, arrival_airport, departure_date))
+    return logger.error('All attempts failed for DEP:\t{}\nARR:\t{}\nDate:\t{}'.format(departure_airport,
+                                                                                       arrival_airport,
+                                                                                       departure_date)
+                        )
 
 
-def persist_legs(legs, departure_date):
+def persist_legs(legs):
     session = Session()
     try:
         session.add_all(legs)
         session.commit()
         logger.info('Committed')
-    except:
+    except Exception:  # TODO: what exception is this trying to catch?
         session.rollback()
         logger.error('Rollback')
         raise
@@ -83,7 +86,10 @@ def get_legs(departure_airport, arrival_airport, departure_date):
     driver.set_page_load_timeout(10)
 
     mmddyyyy_date = departure_date.strftime('%d/%m/%Y')
-    url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(departure_airport, arrival_airport, mmddyyyy_date)
+    url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&" \
+          "mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1" \
+          "%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(departure_airport, arrival_airport,
+                                                                           mmddyyyy_date)
     logger.info('url:{}'.format(url))
     
     try:
@@ -92,7 +98,7 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         time.sleep(60)
         raise
 
-    time.sleep(10) # let the JS run
+    time.sleep(10)  # let the JS run
 
     request_time = dt.datetime.now()
     page = driver.page_source
@@ -103,7 +109,7 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         # Duration
         raw_duration = t.find(lambda d: has_data_test_id("duration", d)).contents[0].strip()
         d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
-        if (d.hour > 2): # don't save these long running ones
+        if d.hour > 2:  # don't save these long running ones  TODO: why?
             continue
         duration = dt.timedelta(hours=d.hour, minutes=d.minute)
         # Departure time
@@ -116,8 +122,9 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         # Airline
         airline = t.find(lambda d: has_data_test_id('airline-name', d)).contents[0].strip()
         # Create the record
-        result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport, departure_date=departure_time, \
-        request_time=request_time, duration=duration, airline=airline))
+        result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport,
+                              departure_date=departure_time, request_time=request_time, duration=duration,
+                              airline=airline))
 
     driver.delete_all_cookies()
     driver.quit()
