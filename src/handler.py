@@ -51,7 +51,7 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
             legs = get_legs(departure_airport, arrival_airport, departure_date)
             if legs is []:
                 raise ValueError("No results.")
-            persist_legs(legs, departure_date)
+            persist_legs(legs)
             return 'Scrape successful.'
         except Exception as e:  # TODO: import the TimeoutException class and except it and ValueError explicitly
             logger.error('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
@@ -105,7 +105,7 @@ def get_legs(departure_airport, arrival_airport, departure_date):
     soup = BeautifulSoup(page, 'html.parser')
 
     result = []
-    for t in soup.find_all('li', {'class':'flight-module segment offer-listing'}):
+    for t in soup.find_all('li', {'class': 'flight-module segment offer-listing'}):
         # Duration
         raw_duration = t.find(lambda d: has_data_test_id("duration", d)).contents[0].strip()
         d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
@@ -137,10 +137,11 @@ def main():
     busy_airports = ['MAD', 'CDG', 'AMS', 'FCO', 'DUB']
     n_tries = 2
     day_count = 180
-    input = [(airport, n) for airport in busy_airports for n in range(day_count)]
-    np.random.shuffle(input)
-    for arrival, n in input:
+    inputs = [(airport, n) for airport in busy_airports for n in range(day_count)]
+    np.random.shuffle(inputs)  # TODO: what's the shuffle for? In case choosing one first affect the price?
+    for arrival, n in inputs:
         departure_date = dt.datetime.now() + dt.timedelta(days=n+1)
+        # TODO: why scrape in both directions?
         scrape(n_tries, departure, arrival, departure_date)
         scrape(n_tries, arrival, departure, departure_date)
 
