@@ -1,12 +1,9 @@
-import os
 import datetime as dt
-import json
 from bs4 import BeautifulSoup
 import sys
 import logging
 import traceback
 import time
-import itertools
 import numpy as np
 
 from sqlalchemy import create_engine
@@ -35,7 +32,10 @@ logger.addHandler(fh)
 
 
 try:
-    connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username, password=rds_config.db_password, host=rds_config.rds_host, db_name=rds_config.db_name)
+    connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username,
+                                                                             password=rds_config.db_password,
+                                                                             host=rds_config.rds_host,
+                                                                             db_name=rds_config.db_name)
     engine = create_engine(connection)
     alchemy_utils.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
