@@ -18,6 +18,7 @@ jupyter = "*"
 pandas = "*"
 keras = "*"
 tensorflow = "*"
+dateutils = "*"
 
 
 [dev-packages]
