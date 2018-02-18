@@ -19,6 +19,7 @@ pandas = "*"
 keras = "*"
 tensorflow = "*"
 dateutils = "*"
+"h5py" = "*"
 
 
 [dev-packages]

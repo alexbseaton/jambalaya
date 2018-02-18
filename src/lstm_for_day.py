@@ -20,6 +20,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error
 from keras.models import Sequential
+import keras.models
 from keras.layers import Dense
 from keras.layers import LSTM
 
@@ -89,13 +90,13 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
 	return agg
 
 
-def make_model(path: str):
+def load_data(path: str) -> tuple:
 	"""
-	Makes an LSTM model based on a dataframe holding some data from the leg table.
+	Loads data in a format ready to be fed to a model.
 	Arguments:
-		path: Path to a pickled dataframe holding Leg data
+	    path: Path to a pickled dataframe holding the Leg data
 	Returns:
-	    None
+	    A tuple containing train_X, train_Y, test_X, test_Y
 	"""
 	df = load(path)
 
@@ -121,12 +122,25 @@ def make_model(path: str):
 	train = values[:n_train, :]
 	test = values[n_train:, :]
 	# split into input and outputs
-	train_X, train_y = train[:, :-1], train[:, -1]
-	test_X, test_y = test[:, :-1], test[:, -1]
+	train_X, train_y = train[:, 1:], train[:, 0]
+	test_X, test_y = test[:, 1:], test[:, 0]
 	# reshape input to be 3D [samples, timesteps, features]
 	train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
 	test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
 	print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
+	return {'train_X': train_X,'train_y': train_y,'test_X': test_X,'test_y':test_y}
+
+
+def make_model(path: str):
+	"""
+	Makes an LSTM model based on a dataframe holding some data from the leg table.
+	Arguments:
+		path: Path to a pickled dataframe holding Leg data
+	Returns:
+	    None
+	"""
+	data = load_data(path)
+	train_X, train_y, test_X, test_y = data['train_X'], data['train_y'], data['test_X'], data['test_y']
 	
 	# design network
 	model = Sequential()
@@ -135,12 +149,22 @@ def make_model(path: str):
 	model.compile(loss='mae', optimizer='adam')
 	# fit network
 	history = model.fit(train_X, train_y, epochs=50, batch_size=72, validation_data=(test_X, test_y), verbose=2, shuffle=False)
+	# Save model
+	model.save('model-{}'.format(datetime.now().strftime('%d-%m-%Y--%H--%M')))
 	# plot history
 	pyplot.plot(history.history['loss'], label='train')
 	pyplot.plot(history.history['val_loss'], label='test')
 	pyplot.legend()
 	pyplot.show()
 
+
+def load_model():
+	return keras.models.load_model('model-17-02-2018--12--00')
+
+
 if __name__ == '__main__':
 	#save('all.pkl', datetime(2018,1,17,0,0,0), datetime(2018, 1, 18, 0, 0, 0))
-	make_model('all.pkl')
+	#make_model('all.pkl')
+	model = load_model()
+	data = load_data('all.pkl')
+	test_X, test_y = data['test_X'], data['test_y']
