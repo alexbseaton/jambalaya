@@ -205,11 +205,18 @@ def predict():
 	scaler = data['scaler']
 	yhat = model.predict(test_X)
 
+	print('yhat shape: {}'.format(yhat.shape))
+	print('y shape: {}'.format(test_y.shape))
+
 	# Invert scaling for predicted
 	inv_yhat = invert_scaling(scaler, yhat, test_X)
 
 	# Invert scaling for actual
-	inv_y = invert_scaling(scaler, yhat, test_X)
+	test_y = test_y.reshape((len(test_y), 1))
+	inv_y = invert_scaling(scaler, test_y, test_X)
+
+	for i in range(50):
+		print('Predicted: {}\tActual: {}\n'.format(inv_yhat[i], inv_y[i]))
 
 	rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
 	print('Test RMSE: %.3f' %rmse)
