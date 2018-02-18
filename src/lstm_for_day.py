@@ -100,6 +100,11 @@ def load_data(path: str) -> tuple:
 	"""
 	df = load(path)
 
+	# Move price to the end as it's what we're predicting
+	cols = df.columns.tolist()
+	cols = cols[1:] + cols[:1]
+	df = df[cols]
+
 	# Data prep: strings to integer labels and dates to ints
 	df.drop('id', axis=1, inplace=True)
 	df.drop('request_time', axis=1, inplace=True)
@@ -113,22 +118,29 @@ def load_data(path: str) -> tuple:
 	values = values.astype('float32')
 
 	# normalize features
-	scaled = MinMaxScaler().fit_transform(values)
-
+	scaler = MinMaxScaler()
+	scaled = scaler.fit_transform(values)
+	print('Values shape: {}'.format(values.shape))
+	print('df: {}'.format(df))
 	reframed = series_to_supervised(scaled)
+	print('Reframed shape: {}'.format(reframed.shape))
+
+	# Need to drop columns we don't want to predict
+	reframed.drop(reframed.columns[[6,7,8,9,10]], axis=1, inplace=True)
+
 	# split into train and test sets
 	values = reframed.values
 	n_train = values.shape[0] - 1000
 	train = values[:n_train, :]
 	test = values[n_train:, :]
 	# split into input and outputs
-	train_X, train_y = train[:, 1:], train[:, 0]
-	test_X, test_y = test[:, 1:], test[:, 0]
+	train_X, train_y = train[:, :-1], train[:, -1]
+	test_X, test_y = test[:, :-1], test[:, -1]
 	# reshape input to be 3D [samples, timesteps, features]
 	train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
 	test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
 	print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
-	return {'train_X': train_X,'train_y': train_y,'test_X': test_X,'test_y':test_y}
+	return {'train_X': train_X,'train_y': train_y,'test_X': test_X,'test_y':test_y, 'scaler':scaler}
 
 
 def make_model(path: str):
@@ -150,21 +162,58 @@ def make_model(path: str):
 	# fit network
 	history = model.fit(train_X, train_y, epochs=50, batch_size=72, validation_data=(test_X, test_y), verbose=2, shuffle=False)
 	# Save model
-	model.save('model-{}'.format(datetime.now().strftime('%d-%m-%Y--%H--%M')))
+	save_to = 'model-{}'.format(datetime.now().strftime('%d-%m-%Y--%H--%M'))
+	model.save(save_to)
 	# plot history
 	pyplot.plot(history.history['loss'], label='train')
 	pyplot.plot(history.history['val_loss'], label='test')
 	pyplot.legend()
 	pyplot.show()
+	return save_to
 
 
-def load_model():
-	return keras.models.load_model('model-17-02-2018--12--00')
+def invert_scaling(scaler, y, x):
+	"""
+	Undoes the work of scaler so we can look at how the model is doing
+	in the pre-feature-engineered problem space.
+
+	Arguments:
+		scaler: The scaler that squashed the values in the first place		
+		y: The column of (scaled) output values *from* the model
+		x: Matrix of (munged) input data *to* the model
+
+	Returns:
+	    y as it was before it got squashed by the scaler, that is,
+		a column that when you apply scaler to it becomes y
+	"""
+	x = x.reshape((x.shape[0], x.shape[2]))
+	inv_y = concatenate((y, x[:, 1:]), axis=1)
+	inv_y = scaler.inverse_transform(inv_y)
+	return inv_y[:,0]
+
+
+def predict():
+	"""
+	Works out the RMSE of the models predictions against reality in the
+	test data.
+	"""
+	model = keras.models.load_model('model-18-02-2018--21--45')
+	data = load_data('all.pkl')
+
+	# Make a prediction
+	test_X, test_y = data['test_X'], data['test_y']
+	scaler = data['scaler']
+	yhat = model.predict(test_X)
+
+	# Invert scaling for predicted
+	inv_yhat = invert_scaling(scaler, yhat, test_X)
+
+	# Invert scaling for actual
+	inv_y = invert_scaling(scaler, yhat, test_X)
+
+	rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
+	print('Test RMSE: %.3f' %rmse)
 
 
 if __name__ == '__main__':
-	#save('all.pkl', datetime(2018,1,17,0,0,0), datetime(2018, 1, 18, 0, 0, 0))
-	#make_model('all.pkl')
-	model = load_model()
-	data = load_data('all.pkl')
-	test_X, test_y = data['test_X'], data['test_y']
+	predict()
