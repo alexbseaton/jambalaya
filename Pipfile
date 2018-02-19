@@ -19,6 +19,9 @@ pandas = "*"
 keras = "*"
 tensorflow = "*"
 dateutils = "*"
+sklearn = "*"
+matplotlib = "*"
+
 
 
 [dev-packages]
