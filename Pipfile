@@ -21,7 +21,6 @@ tensorflow = "*"
 dateutils = "*"
 sklearn = "*"
 matplotlib = "*"
-
 "h5py" = "*"
 
 
