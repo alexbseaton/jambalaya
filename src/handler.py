@@ -33,9 +33,11 @@ fh.setLevel(logging.ERROR)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
 
-
 try:
-    connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username, password=rds_config.db_password, host=rds_config.rds_host, db_name=rds_config.db_name)
+    connection = 'mysql+pymysql://{user}:{password}@{host}/{db_name}'.format(user=rds_config.db_username,
+                                                                             password=rds_config.db_password,
+                                                                             host=rds_config.rds_host,
+                                                                             db_name=rds_config.db_name)
     engine = create_engine(connection)
     alchemy_utils.Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
@@ -43,8 +45,9 @@ except Exception as e:
     logger.error("ERROR: Unexpected error: Could not connect to MySql instance.\t{}".format(e))
     sys.exit()
 
-
 logger.info("SUCCESS: Connection to RDS mysql instance succeeded")
+
+
 def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
@@ -54,9 +57,11 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
             persist_legs(legs, departure_date)
             return 'Scraping successful'
         except Exception as e:
-            logger.error('Attempt {} of {} failed. Retrying...'.format(i+1, n_tries))
+            logger.error('Attempt {} of {} failed. Retrying...'.format(i + 1, n_tries))
             traceback.print_exc()
-    return logger.error('All attempts failed for DEP:\t{}\nARR:\t{}\nDate:\t{}'.format(departure_airport, arrival_airport, departure_date))
+    return logger.error(
+        'All attempts failed for DEP:\t{}\nARR:\t{}\nDate:\t{}'.format(departure_airport, arrival_airport,
+                                                                       departure_date))
 
 
 def persist_legs(legs, departure_date):
@@ -83,27 +88,28 @@ def get_legs(departure_airport, arrival_airport, departure_date):
     driver.set_page_load_timeout(10)
 
     mmddyyyy_date = departure_date.strftime('%d/%m/%Y')
-    url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(departure_airport, arrival_airport, mmddyyyy_date)
+    url = "https://www.expedia.co.uk/Flights-Search?flight-type=on&starDate=14%2F01%2F2018&_xpid=11905%7C1&mode=search&trip=oneway&leg1=from:{0}to:{1}departure:{2}TANYT&passengers=children%3A0%2Cadults%3A1%2Cseniors%3A0%2Cinfantinlap%3AY&options=maxhops%3A0%2C".format(
+        departure_airport, arrival_airport, mmddyyyy_date)
     logger.info('url:{}'.format(url))
-    
+
     try:
         driver.get(url)
     except s_exceptions.TimeoutException:
         time.sleep(60)
         raise
 
-    time.sleep(10) # let the JS run
+    time.sleep(10)  # let the JS run
 
     request_time = dt.datetime.now()
     page = driver.page_source
     soup = BeautifulSoup(page, 'html.parser')
 
     result = []
-    for t in soup.find_all('li', {'class':'flight-module segment offer-listing'}):
+    for t in soup.find_all('li', {'class': 'flight-module segment offer-listing'}):
         # Duration
         raw_duration = t.find(lambda d: has_data_test_id("duration", d)).contents[0].strip()
         d = dt.datetime.strptime(raw_duration, "%Hh %Mm")
-        if (d.hour > 2): # don't save these long running ones
+        if (d.hour > 2):  # don't save these long running ones
             continue
         duration = dt.timedelta(hours=d.hour, minutes=d.minute)
         # Departure time
@@ -116,8 +122,9 @@ def get_legs(departure_airport, arrival_airport, departure_date):
         # Airline
         airline = t.find(lambda d: has_data_test_id('airline-name', d)).contents[0].strip()
         # Create the record
-        result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport, departure_date=departure_time, \
-        request_time=request_time, duration=duration, airline=airline))
+        result.append(leg.Leg(price=price, departure_location=departure_airport, arrival_location=arrival_airport,
+                              departure_date=departure_time, \
+                              request_time=request_time, duration=duration, airline=airline))
 
     driver.delete_all_cookies()
     driver.quit()
@@ -133,7 +140,7 @@ def main():
     input = [(airport, n) for airport in busy_airports for n in range(day_count)]
     np.random.shuffle(input)
     for arrival, n in input:
-        departure_date = dt.datetime.now() + dt.timedelta(days=n+1)
+        departure_date = dt.datetime.now() + dt.timedelta(days=n + 1)
         scrape(n_tries, departure, arrival, departure_date)
         scrape(n_tries, arrival, departure, departure_date)
 

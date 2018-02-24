@@ -20,7 +20,7 @@ class Leg(alchemy_utils.Base):
     """
     __tablename__ = 'leg'
     id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
-    price = Column(DECIMAL(15,2))
+    price = Column(DECIMAL(15, 2))
     departure_location = Column(String(3))
     arrival_location = Column(String(3))
     departure_date = Column(DateTime())
@@ -28,16 +28,14 @@ class Leg(alchemy_utils.Base):
     duration = Column(Interval())
     airline = Column(String(100))
 
-
     def represents_same_leg(self, other):
         """
         Returns true if this object represents the same flight as other
         """
-        return self.departure_location == other.departure_location and\
-        self.airline == other.airline and\
-        self.arrival_location == other.arrival_location and\
-        self.departure_date == other.departure_date
-
+        return self.departure_location == other.departure_location and \
+               self.airline == other.airline and \
+               self.arrival_location == other.arrival_location and \
+               self.departure_date == other.departure_date
 
     def similar_flights(self, all_legs):
         """
@@ -50,7 +48,6 @@ class Leg(alchemy_utils.Base):
             A list of the legs in all_legs that are similar to this one
         """
         return [f for f in all_legs if f.represents_same_leg(self)]
-
 
     def __repr__(self):
         return str(self.__dict__)
@@ -68,7 +65,7 @@ def make_groups(legs):
         represent the same flight.
     """
     grouped = []
-    matched = {leg:False for leg in legs}
+    matched = {leg: False for leg in legs}
     for leg in l:
         if matched[leg]:
             continue
