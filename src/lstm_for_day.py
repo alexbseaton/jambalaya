@@ -5,17 +5,13 @@ Most of the code is just lifted from
 https://machinelearningmastery.com/multivariate-time-series-forecasting-lstms-keras/
 
 """
-from leg import Leg
+import os
+import pandas as pd
 import pickle as pkl
 from datetime import datetime
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder  # TODO change to OHE
 from math import sqrt
 from numpy import concatenate
 from matplotlib import pyplot
-from pandas import read_csv
-from pandas import DataFrame
-from pandas import concat
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error
@@ -23,6 +19,8 @@ from keras.models import Sequential
 import keras.models
 from keras.layers import Dense
 from keras.layers import LSTM
+
+from leg import Leg
 
 
 def save(path: str, date_after: datetime, date_before: datetime):
@@ -68,7 +66,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
         Pandas DataFrame of series framed for supervised learning.
     """
     n_vars = 1 if type(data) is list else data.shape[1]
-    df = DataFrame(data)
+    df = pd.DataFrame(data)
     cols, names = list(), list()
     # input sequence (t-n, ... t-1)
     for i in range(n_in, 0, -1):
@@ -82,7 +80,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
         else:
             names += [('var%d(t+%d)' % (j + 1, i)) for j in range(n_vars)]
     # put it all together
-    agg = concat(cols, axis=1)
+    agg = pd.concat(cols, axis=1)
     agg.columns = names
     # drop rows with NaN values
     if dropnan:
@@ -198,8 +196,8 @@ def predict():
     Works out the RMSE of the models predictions against reality in the
     test data.
     """
-    model = keras.models.load_model('model-18-02-2018--21--45')
-    data = load_data('all.pkl')
+    model = keras.models.load_model(os.path.join(os.pardir, 'model-18-02-2018--21--45'))
+    data = load_data(os.path.join(os.pardir, 'all.pkl'))
 
     # Make a prediction
     test_X, test_y = data['test_X'], data['test_y']

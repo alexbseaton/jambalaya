@@ -1,12 +1,9 @@
-import os
 import datetime as dt
-import json
 from bs4 import BeautifulSoup
 import sys
 import logging
 import traceback
 import time
-import itertools
 import numpy as np
 
 from sqlalchemy import create_engine
