@@ -49,11 +49,11 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
     for i in range(n_tries):
         try:
             legs = get_legs(departure_airport, arrival_airport, departure_date)
-            if legs == []:
+            if not legs:
                 raise ValueError("No results")
-            persist_legs(legs, departure_date)
+            persist_legs(legs)
             return 'Scraping successful'
-        except Exception as e:
+        except (ValueError, TimeoutError):
             logger.error('Attempt {} of {} failed. Retrying...'.format(i + 1, n_tries))
             traceback.print_exc()
     return logger.error(
@@ -61,13 +61,13 @@ def scrape(n_tries, departure_airport, arrival_airport, departure_date):
                                                                        departure_date))
 
 
-def persist_legs(legs, departure_date):
+def persist_legs(legs):
     session = Session()
     try:
         session.add_all(legs)
         session.commit()
         logger.info('Committed')
-    except:
+    except Exception:
         session.rollback()
         logger.error('Rollback')
         raise
