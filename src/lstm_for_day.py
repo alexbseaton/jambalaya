@@ -1,6 +1,9 @@
 """
 Make an LSTM model based on a day's requests.
 
+This is fundamentally broken because the departure dates don't come at a regular cadence-
+whereas the example in the blog was using data that took a sample point every hour.
+
 Most of the code is just lifted from
 https://machinelearningmastery.com/multivariate-time-series-forecasting-lstms-keras/
 
