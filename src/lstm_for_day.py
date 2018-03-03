@@ -54,37 +54,32 @@ def load(path: str):
         return pkl.load(f)
 
 
-def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
+def series_to_supervised(data):
     """
     Frame a time series as a supervised learning dataset.
     Arguments:
-        data: Sequence of observations as a list or NumPy array.
-        n_in: Number of lag observations as input (X).
-        n_out: Number of observations as output (y).
-        dropnan: Boolean whether or not to drop rows with NaN values.
+        data: Sequence of observations as a Pandas Dataframe.
     Returns:
         Pandas DataFrame of series framed for supervised learning.
     """
-    n_vars = 1 if type(data) is list else data.shape[1]
-    df = pd.DataFrame(data)
+    n_vars = data.shape[1]
+    print('n_vars: {}'.format(n_vars))
+    print('data for conversion:{}\n'.format(data))
     cols, names = list(), list()
     # input sequence (t-n, ... t-1)
-    for i in range(n_in, 0, -1):
-        cols.append(df.shift(i))
-        names += [('var%d(t-%d)' % (j + 1, i)) for j in range(n_vars)]
+    cols.append(data.shift(1))
+    names += [col for col in data.columns if col != 'price']
+    names.append('price(t-1)')
     # forecast sequence (t, t+1, ... t+n)
-    for i in range(0, n_out):
-        cols.append(df.shift(-i))
-        if i == 0:
-            names += [('var%d(t)' % (j + 1)) for j in range(n_vars)]
-        else:
-            names += [('var%d(t+%d)' % (j + 1, i)) for j in range(n_vars)]
+    cols.append(data['price'])
+    names.append('price(t)')
     # put it all together
     agg = pd.concat(cols, axis=1)
     agg.columns = names
     # drop rows with NaN values
-    if dropnan:
-        agg.dropna(inplace=True)
+    agg.dropna(inplace=True)
+
+    print('Converted to supervised:\n{}'.format(agg))
     return agg
 
 
@@ -117,14 +112,11 @@ def load_data(path: str) -> tuple:
 
     # normalize features
     scaler = MinMaxScaler()
-    scaled = scaler.fit_transform(values)
+    df[:] = scaler.fit_transform(df[:])
     print('Values shape: {}'.format(values.shape))
     print('df: {}'.format(df))
-    reframed = series_to_supervised(scaled)
+    reframed = series_to_supervised(df)
     print('Reframed shape: {}'.format(reframed.shape))
-
-    # Need to drop columns we don't want to predict
-    reframed.drop(reframed.columns[[6, 7, 8, 9, 10]], axis=1, inplace=True)
 
     # split into train and test sets
     values = reframed.values
@@ -141,13 +133,13 @@ def load_data(path: str) -> tuple:
     return {'train_X': train_X, 'train_y': train_y, 'test_X': test_X, 'test_y': test_y, 'scaler': scaler}
 
 
-def make_model(path: str):
+def make_model(path: str) -> str:
     """
     Makes an LSTM model based on a dataframe holding some data from the leg table.
     Arguments:
         path: Path to a pickled dataframe holding Leg data
     Returns:
-        None
+        The path to which the model has been saved
     """
     data = load_data(path)
     train_X, train_y, test_X, test_y = data['train_X'], data['train_y'], data['test_X'], data['test_y']
