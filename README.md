@@ -1,7 +1,7 @@
 # jambalaya
 
 ## Current Goal
-Get reliable data
+Make a predictive model of flight prices using a particular day's requests.
 
 ## Installation
 Install PhantomJS and put it on your PATH.

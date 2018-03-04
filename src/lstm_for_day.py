@@ -1,9 +1,6 @@
 """
 Make an LSTM model based on a day's requests.
 
-This is fundamentally broken because the departure dates don't come at a regular cadence-
-whereas the example in the blog was using data that took a sample point every hour.
-
 Most of the code is just lifted from
 https://machinelearningmastery.com/multivariate-time-series-forecasting-lstms-keras/
 
@@ -86,7 +83,7 @@ def series_to_supervised(data):
     return agg
 
 
-def load_data(path: str) -> tuple:
+def prep_data(path: str) -> tuple:
     """
     Loads data in a format ready to be fed to a model.
     Arguments:
@@ -144,7 +141,7 @@ def make_model(path: str) -> str:
     Returns:
         The path to which the model has been saved
     """
-    data = load_data(path)
+    data = prep_data(path)
     train_X, train_y, test_X, test_y = data['train_X'], data['train_y'], data['test_X'], data['test_y']
 
     # design network
@@ -188,19 +185,22 @@ def invert_scaling(scaler, y, x):
 
 def predict():
     """
-    Works out the RMSE of the models predictions against reality in the
-    test data.
+    Uses the model to make some predictions about prices using the test dataset.
     """
-    model = keras.models.load_model(os.path.join(os.pardir, 'model-18-02-2018--21--45'))
-    data = load_data(os.path.join(os.pardir, 'all.pkl'))
+    model = keras.models.load_model(os.path.join(os.pardir, 'data', 'model-04-03-2018--20--58'))
+
+    pickled = os.path.join(os.pardir, 'data', 'all.pkl')
+    data = prep_data(pickled) # the munged data
+    original = load(pickled).sort_values(by='departure_date') # the 'un-munged' data
+    print('Original: {}'.format(original))
+
+    # The i-th entry in original_test corresponds to the i-th entry in test_x and test_y
+    original_test = original[original.shape[0]-1000:]
 
     # Make a prediction
     test_X, test_y = data['test_X'], data['test_y']
     scaler = data['scaler']
     yhat = model.predict(test_X)
-
-    print('yhat shape: {}'.format(yhat.shape))
-    print('y shape: {}'.format(test_y.shape))
 
     # Invert scaling for predicted
     inv_yhat = invert_scaling(scaler, yhat, test_X)
@@ -209,12 +209,22 @@ def predict():
     test_y = test_y.reshape((len(test_y), 1))
     inv_y = invert_scaling(scaler, test_y, test_X)
 
-    for i in range(50):
-        print('Predicted: {}\tActual: {}\n'.format(inv_yhat[i], inv_y[i]))
-
     rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
     print('Test RMSE: %.3f' % rmse)
 
+    # Cherry pick the gatwick to madrid easyjet flights that happen to be in the test dataset
+    matching = original_test[['departure_location', 'arrival_location', 'airline']].values == ['LGW', 'MAD', 'easyJet']
+    gat_to_mad = [i for i in range(len(matching)) if matching[i].all()]
+
+    pyplot.xlabel('Nth to Depart')
+    pyplot.ylabel('Price (£)')
+    pyplot.title('Gatwick to Madrid EasyJet Flights')
+    pyplot.plot([inv_yhat[i] for i in gat_to_mad], label='predicted')
+    pyplot.plot([inv_y[i] for i in gat_to_mad], label='actual')
+    pyplot.legend()
+    pyplot.show()
+
 
 if __name__ == '__main__':
+    #make_model('../data/all.pkl')
     predict()
