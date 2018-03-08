@@ -154,7 +154,7 @@ def make_model(path: str) -> str:
                         shuffle=False)
     # Save model
     save_to = 'model-{}'.format(datetime.now().strftime('%d-%m-%Y--%H--%M'))
-    model.save(save_to)
+    model.save(os.path.join(os.pardir, 'data', save_to))
     # plot history
     pyplot.plot(history.history['loss'], label='train')
     pyplot.plot(history.history['val_loss'], label='test')
@@ -183,11 +183,14 @@ def invert_scaling(scaler, y, x):
     return inv_y[:, 0]
 
 
-def predict():
+def predict(path_to_model):
     """
     Uses the model to make some predictions about prices using the test dataset.
+
+    Arguments:
+        path_to_model: The name of the model, which should be saved in the data directory
     """
-    model = keras.models.load_model(os.path.join(os.pardir, 'data', 'model-04-03-2018--20--58'))
+    model = keras.models.load_model(os.path.join(os.pardir, 'data', path_to_model))
 
     pickled = os.path.join(os.pardir, 'data', 'all.pkl')
     data = prep_data(pickled) # the munged data
@@ -216,15 +219,20 @@ def predict():
     matching = original_test[['departure_location', 'arrival_location', 'airline']].values == ['LGW', 'MAD', 'easyJet']
     gat_to_mad = [i for i in range(len(matching)) if matching[i].all()]
 
+    matching = original_test[['departure_location', 'arrival_location', 'airline']].values == ['LGW', 'DUB', 'Ryanair']
+    gat_to_dub = [i for i in range(len(matching)) if matching[i].all()]
+
     pyplot.xlabel('Nth to Depart')
     pyplot.ylabel('Price (£)')
-    pyplot.title('Gatwick to Madrid EasyJet Flights')
-    pyplot.plot([inv_yhat[i] for i in gat_to_mad], label='predicted')
-    pyplot.plot([inv_y[i] for i in gat_to_mad], label='actual')
+    pyplot.title('Gatwick to Madrid and Dublin Flights')
+    pyplot.plot([inv_yhat[i] for i in gat_to_mad], label='predicted to mad')
+    pyplot.plot([inv_y[i] for i in gat_to_mad], label='actual to mad')
+    pyplot.plot([inv_yhat[i] for i in gat_to_dub], label='predicted to dub')
+    pyplot.plot([inv_y[i] for i in gat_to_dub], label='actual to dub')
     pyplot.legend()
     pyplot.show()
 
 
 if __name__ == '__main__':
-    #make_model('../data/all.pkl')
-    predict()
+    model = make_model('../data/all.pkl')
+    predict(model)
