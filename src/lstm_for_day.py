@@ -17,7 +17,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_squared_error
 from keras.models import Sequential
 import keras.models
-from keras.layers import Dense
+from keras.layers import Dense, Embedding
 from keras.layers import LSTM
 
 from leg import Leg
@@ -146,11 +146,12 @@ def make_model(path: str) -> str:
 
     # design network
     model = Sequential()
-    model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
-    model.add(Dense(1))
-    model.compile(loss='mae', optimizer='adam')
+    #model.add(Embedding(20000, 128))
+    model.add(LSTM(128, dropout=0.2, recurrent_dropout=0.2, input_shape=(train_X.shape[1], train_X.shape[2])))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(loss='binary_crossentropy', optimizer='adam')
     # fit network
-    history = model.fit(train_X, train_y, epochs=50, batch_size=72, validation_data=(test_X, test_y), verbose=2,
+    history = model.fit(train_X, train_y, epochs=30, batch_size=32, validation_data=(test_X, test_y), verbose=2,
                         shuffle=False)
     # Save model
     save_to = 'model-{}'.format(datetime.now().strftime('%d-%m-%Y--%H--%M'))
@@ -227,12 +228,13 @@ def predict(path_to_model):
     pyplot.title('Gatwick to Madrid and Dublin Flights')
     pyplot.plot([inv_yhat[i] for i in gat_to_mad], label='predicted to mad')
     pyplot.plot([inv_y[i] for i in gat_to_mad], label='actual to mad')
-    pyplot.plot([inv_yhat[i] for i in gat_to_dub], label='predicted to dub')
-    pyplot.plot([inv_y[i] for i in gat_to_dub], label='actual to dub')
+    #pyplot.plot([inv_yhat[i] for i in gat_to_dub], label='predicted to dub')
+    #pyplot.plot([inv_y[i] for i in gat_to_dub], label='actual to dub')
     pyplot.legend()
     pyplot.show()
 
 
 if __name__ == '__main__':
-    model = make_model('../data/all.pkl')
-    predict(model)
+    #model = make_model('../data/all.pkl')
+    #predict(model)
+    predict('model-08-03-2018--17--18')
