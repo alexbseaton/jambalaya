@@ -49,7 +49,7 @@ def get_prices_for_flight(departure_location: str, arrival_location: str, airlin
         plt.title('{} to {}, {}, leaving {}'.format(\
             departure_location, arrival_location, airline, departure_date))
         plt.savefig('../data/{}-{}-{}.png'.format(\
-            departure_location, arrival_location, departure_date.strftime('%H--%M-{}'.format(airline))))
+            departure_location, arrival_location, departure_date.strftime('%H--%M-{}'.format(airline.replace(' ', '')))))
         #plt.show()
 
     return data
