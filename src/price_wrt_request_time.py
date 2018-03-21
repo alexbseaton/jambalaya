@@ -2,22 +2,58 @@
 have been best to buy a ticket for it.
 """
 
-from handler import engine
+import handler
 import pandas as pd
 import matplotlib.pyplot as plt
+import datetime as dt
+from leg import Leg
 
-statement = """
-    SELECT * FROM leg
-    WHERE departure_location = 'LGW'
-    AND arrival_location = 'DUB'
-    AND airline = 'Aer Lingus'
-    AND departure_date = '2018-03-22 10:55:00'
+session = handler.Session()
+
+
+def get_prices_for_flight(departure_location: str, arrival_location: str, airline: str, departure_date: dt.datetime, save_figure=True) -> pd.DataFrame:
+    """Gets all the prices we have recorded for a particular flight.
+
+    By default, this also saves a graph of those prices.
+
+    Args:
+        departure_location: The airport the plane leaves from, eg 'LGW'.
+        arrival_location: The airport the plane lands in, eg 'MAD'.
+        airline: The airline running the flight, see the DB for the exact format of these.
+        departure_date: When the flight leaves. Seconds and smaller are ignored.
+        save_figure: Whether to save a graph of the prices in the data folder. Defaults to True.
+
+    Returns:
+        A Pandas dataframe holding two columns: the 'price' for each 'request_time'.
+
+    Raises:
+        ValueError: If we don't have data for the flight you've specified
     """
+    l = session.query(Leg.request_time, Leg.price).\
+        filter(Leg.departure_location == departure_location).\
+        filter(Leg.arrival_location == arrival_location).\
+        filter(Leg.airline == airline).\
+        filter(Leg.departure_date == departure_date)
 
-with engine.connect() as con:
-    same_flight = pd.read_sql(statement, con)
+    if l.count() == 0:
+        raise ValueError('No matching flight found')
 
-same_flight.plot(x='request_time', y='price')
-plt.ylabel('Price (£)')
-plt.title('Gatwick to Dublin, Aer Lingus, leaving 1055 21/3')
-plt.savefig('../data/LGW-DUB-21-3.png')
+    print('Getting prices for the flight with {} leaving at {} from {} to {}.\nThere are {} entries.'\
+        .format(airline, departure_date, departure_location, arrival_location, l.count()))
+
+    data = pd.read_sql(l.statement, l.session.bind)
+
+    if save_figure:
+        data.plot(x='request_time', y='price')
+        plt.ylabel('Price (£)')
+        plt.title('{} to {}, {}, leaving {}'.format(\
+            departure_location, arrival_location, airline, departure_date))
+        plt.savefig('../data/{}-{}-{}.png'.format(\
+            departure_location, arrival_location, departure_date.strftime('%H--%M-{}'.format(airline))))
+        #plt.show()
+
+    return data
+
+
+if __name__ == '__main__':
+    get_prices_for_flight('LGW', 'DUB', 'Aer Lingus', dt.datetime(2018, 3, 22, 10, 55))

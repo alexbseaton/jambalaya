@@ -1,12 +1,12 @@
 # jambalaya
 
 ## Current Goal
-Graph price movements of several flights using the data we've gathered so far.
+Graph price movements of several flights using the data we've gathered so far. Compare them on the same axes.
 
 ## Installation
-You need a 64 bit python 3 installation.
+You need a 64 bit Python 3 installation.
 
-Install pipenv.
+Install Pipenv.
 
 Go to the jambalaya folder and run:
 
