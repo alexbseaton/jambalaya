@@ -26,7 +26,7 @@ from leg import Leg
 def save(path: str, date_after: datetime, date_before: datetime):
     """
     Save requests made between two dates to a pickled dataframe.
-    Arguments:
+    Args:
         path: The path to save to
         date_after: Requests falling on or after this date will be saved
         date_before: Requests falling before this date will be saved
@@ -47,7 +47,7 @@ def save(path: str, date_after: datetime, date_before: datetime):
 def load(path: str):
     """
     Loads a pickled dataframe saved at path.
-    Arguments:
+    Args:
         path: 
     """
     with open(path, 'rb') as f:
@@ -57,7 +57,7 @@ def load(path: str):
 def series_to_supervised(data):
     """
     Frame a time series as a supervised learning dataset.
-    Arguments:
+    Args:
         data: Sequence of observations as a Pandas Dataframe.
     Returns:
         Pandas DataFrame of series framed for supervised learning.
@@ -86,7 +86,7 @@ def series_to_supervised(data):
 def prep_data(path: str) -> tuple:
     """
     Loads data in a format ready to be fed to a model.
-    Arguments:
+    Args:
         path: Path to a pickled dataframe holding the Leg data
     Returns:
         A tuple containing train_X, train_Y, test_X, test_Y
@@ -136,7 +136,7 @@ def prep_data(path: str) -> tuple:
 def make_model(path: str) -> str:
     """
     Makes an LSTM model based on a dataframe holding some data from the leg table.
-    Arguments:
+    Args:
         path: Path to a pickled dataframe holding Leg data
     Returns:
         The path to which the model has been saved
@@ -169,7 +169,7 @@ def invert_scaling(scaler, y, x):
     Undoes the work of scaler so we can look at how the model is doing
     in the pre-feature-engineered problem space.
 
-    Arguments:
+    Args:
         scaler: The scaler that squashed the values in the first place
         y: The column of (scaled) output values *from* the model
         x: Matrix of (munged) input data *to* the model
@@ -188,7 +188,7 @@ def predict(path_to_model):
     """
     Uses the model to make some predictions about prices using the test dataset.
 
-    Arguments:
+    Args:
         path_to_model: The name of the model, which should be saved in the data directory
     """
     model = keras.models.load_model(os.path.join(os.pardir, 'data', path_to_model))
