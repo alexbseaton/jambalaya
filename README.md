@@ -4,6 +4,8 @@
 Graph price movements of several flights using the data we've gathered so far.
 
 ## Installation
+You need a 64 bit python 3 installation.
+
 Install pipenv.
 
 Go to the jambalaya folder and run:
