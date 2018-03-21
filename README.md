@@ -1,7 +1,23 @@
 # jambalaya
 
 ## Current Goal
-Graph price movements of several flights using the data we've gathered so far. Compare them on the same axes.
+
+Simple:
+
+Abstract away the logic in price_wrt_request_time.py so that we can graph price histories on the same axes with a nice legend
+given only a collection of flights to consider.
+
+Hard:
+
+Make a predictive model where given:
+
+* departure location, arrival location, departure date and an airline (ie, a particular flight) and also 
+* a datetime representing when we ask for a price from the search engine (the request time), 
+
+predicts the price that the search engine will yield. This is its guess of how much a ticket would be if we
+bought it at that time. We can use that to deduce the (predicted) best time to buy a ticket.
+
+First step: Focus on just one flight (so only around 60 examples) and see if we can get anything vaguely sensible working.
 
 ## Installation
 You need a 64 bit Python 3 installation.
@@ -14,4 +30,4 @@ Go to the jambalaya folder and run:
 * *pipenv shell*
 
 If you want to run handler.py, install PhantomJS and put it on your PATH, but it probably
-doesn't need any more work and the server runs it every day.
+doesn't need any more work and the server runs it so we don't need to run it locally.

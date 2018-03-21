@@ -11,7 +11,7 @@ from leg import Leg
 session = handler.Session()
 
 
-def get_prices_for_flight(departure_location: str, arrival_location: str, airline: str, departure_date: dt.datetime, save_figure=True) -> pd.DataFrame:
+def get_prices_for_flight(departure_location: str, arrival_location: str, airline: str, departure_date: dt.datetime, save_figure=False) -> pd.DataFrame:
     """Gets all the prices we have recorded for a particular flight.
 
     By default, this also saves a graph of those prices.
@@ -21,7 +21,7 @@ def get_prices_for_flight(departure_location: str, arrival_location: str, airlin
         arrival_location: The airport the plane lands in, eg 'MAD'.
         airline: The airline running the flight, see the DB for the exact format of these.
         departure_date: When the flight leaves. Seconds and smaller are ignored.
-        save_figure: Whether to save a graph of the prices in the data folder. Defaults to True.
+        save_figure: Whether to save a graph of the prices in the data folder.
 
     Returns:
         A Pandas dataframe holding two columns: the 'price' for each 'request_time'.
@@ -56,4 +56,12 @@ def get_prices_for_flight(departure_location: str, arrival_location: str, airlin
 
 
 if __name__ == '__main__':
-    get_prices_for_flight('LGW', 'DUB', 'Aer Lingus', dt.datetime(2018, 3, 22, 10, 55))
+    # TODO Generalise this: I want to be able to draw any price history graph like this given an arbitrary collection of flights
+    aer_lingus = get_prices_for_flight('LGW', 'DUB', 'Aer Lingus', dt.datetime(2018, 3, 22, 10, 55))
+    ryanair = get_prices_for_flight('LGW', 'DUB', 'Ryanair', dt.datetime(2018, 3, 22, 9, 40))
+    ax = aer_lingus.plot(x='request_time', y='price')
+    ryanair.plot(x='request_time', y='price', ax=ax)
+    ax.legend(['Aer Lingus 1055', 'Ryanair 0940'])
+    plt.title('LGW to DUB 22/3')
+    plt.savefig('../data/ryanair_and_lingus_on_same_axes.png')
+    plt.show()
