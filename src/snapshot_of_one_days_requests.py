@@ -8,28 +8,6 @@ import matplotlib.dates as mpldates
 
 session = Session()
 
-
-def similar_flights(flight, all_flights):
-    return [f for f in all_flights if f.represents_same_leg(flight)]
-
-
-def make_groups():
-    grouped = []
-    matched = {leg: False for leg in l}
-    for leg in l:
-        if matched[leg]:
-            continue
-        sim = similar_flights(leg, l)
-        grouped.append(sim)
-        for s in sim:
-            matched[s] = True
-
-    for grp in grouped:
-        if (len(grp)) > 1:
-            multiple = grp
-    return grouped
-
-
 l = session.query(Leg). \
     filter(Leg.departure_location == 'LGW'). \
     filter(Leg.arrival_location == 'DUB'). \
