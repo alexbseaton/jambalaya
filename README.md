@@ -4,8 +4,7 @@
 
 Simple:
 
-Abstract away the logic in price_wrt_request_time.py so that we can graph price histories on the same axes with a nice legend
-given only a collection of flights to consider.
+Support graphing price histories given an arbitrary collection of flights (ATM it is assumed all will be between the same airports)
 
 Hard:
 
