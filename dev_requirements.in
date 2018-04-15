@@ -1,9 +1,0 @@
-bs4
-requests
-boto3
-datetime
-awscli
-typing
-matplotlib
-pymysql
-sqlalchemy
