@@ -4,6 +4,7 @@ __pycache__
 *.DS_Store
 *.log
 *.ipynb_checkpoints*
+*/large_data/*
 
 # IDE files
 .idea/
