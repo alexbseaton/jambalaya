@@ -2,6 +2,8 @@
 have been best to buy a ticket for it.
 """
 
+import csv
+from sqlalchemy import desc
 import handler
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -81,8 +83,29 @@ def draw_on_same_axes(flights, show_plot=True, save_fig=True):
 def _stringify(flight):
     return '{} {} from {} to {}'.format(flight['airline'], flight['departure_date'].strftime('%H%M'), \
     flight['departure_airport'], flight['arrival_airport'])
-    
+
+
+def best_date(departure_airport: str, arrival_airport: str, airline: str, departure_date: dt.datetime):
+    return session.query(Leg.request_time).\
+        filter(Leg.departure_location == departure_airport).\
+        filter(Leg.arrival_location == arrival_airport).\
+        filter(Leg.airline == airline).\
+        filter(Leg.departure_date == departure_date).\
+        order_by(desc(Leg.price)).\
+        first()[0]
+
+
+def best_time_to_buy():
+    time_to_buy = '''SELECT departure_location, arrival_location, airline, departure_date, MIN(price), request_time 
+        FROM leg
+        GROUP BY departure_location, arrival_location, airline, departure_date'''
+    with open('../data/diffs.csv', 'w') as f:
+        outcsv = csv.writer(f)
+        outcsv.writerow(['DEP', 'ARR', 'Dep Date', 'Best time before departure'])
+        for departure_location, arrival_location, airline, departure_date, price, request_time in session.execute(time_to_buy):
+            diff = departure_date - request_time
+            outcsv.writerow([departure_location, arrival_location, departure_date, airline, diff])
+
 
 if __name__ == '__main__':
-    draw_on_same_axes([{'airline': 'Aer Lingus', 'departure_date': dt.datetime(2018, 3, 22, 10, 55), 'departure_airport': 'LGW', 'arrival_airport': 'DUB'}, \
-    {'airline': 'Ryanair', 'departure_date': dt.datetime(2018, 3, 22, 9, 40), 'departure_airport': 'LGW', 'arrival_airport': 'DUB'}])
+    best_time_to_buy()
