@@ -32,7 +32,7 @@ def get_prices_for_flight(departure_location: str, arrival_location: str, airlin
         filter(Leg.airline == airline).\
         filter(Leg.departure_date == departure_date)
 
-    if l.count() == 0:
+    if not l.count():
         raise ValueError('No matching flight found')
 
     print('Getting prices for the flight with {} leaving at {} from {} to {}.\nThere are {} entries.'\
